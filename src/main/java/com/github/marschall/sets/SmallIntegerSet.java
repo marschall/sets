@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  *
  * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
  */
-public final class SmallIntegerSet implements Set<Integer>, Serializable {
+public final class SmallIntegerSet implements Set<Integer>, Serializable, Cloneable {
 
   private static final long serialVersionUID = 1L;
 
@@ -89,13 +89,24 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable {
 
   @Override
   public void forEach(Consumer<? super Integer> action) {
-    // TODO Auto-generated method stub
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSet(i)) {
+        action.accept(i);
+      }
+    }
   }
 
   @Override
   public Object[] toArray() {
-    // TODO Auto-generated method stub
-    return null;
+    // REVIEW discussable if it should be an Integer[]
+    Object[] result = new Object[this.size()];
+    int current = 0;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSet(i)) {
+        result[current++] = i;
+      }
+    }
+    return result;
   }
 
   @Override
@@ -155,6 +166,38 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable {
   @Override
   public void clear() {
     this.values = 0;
+  }
+
+  @Override
+  public String toString() {
+    // TODO Auto-generated method stub
+    return super.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    // TODO Auto-generated method stub
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    // TODO Auto-generated method stub
+    return super.equals(obj);
+  }
+
+  /**
+   * Returns a shallow copy of this {@code SmallIntegerSet} instance.
+   *
+   * @return a clone of this {@code SmallIntegerSet} instance
+   */
+  public Object clone() {
+    try {
+      return super.clone();
+    } catch (CloneNotSupportedException e) {
+      // this shouldn't happen, since we are Cloneable
+      throw new InternalError(e);
+    }
   }
 
 }

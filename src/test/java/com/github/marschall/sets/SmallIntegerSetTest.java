@@ -5,7 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -43,6 +45,68 @@ public class SmallIntegerSetTest {
 
       assertEquals(expectedSize + 1, this.set.size());
     }
+  }
+
+  @Test
+  public void clear() {
+    this.set.add(SmallIntegerSet.MIN_VALUE);
+
+    this.set.clear();
+    assertTrue(this.set.isEmpty());
+    assertEquals(0, this.set.size());
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void addNull() {
+    this.set.add(null);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void containsNull() {
+    this.set.contains(null);
+  }
+
+  @Test(expected = ClassCastException.class)
+  public void containsString() {
+    this.set.contains("String");
+  }
+
+  @Test
+  public void addAllGeneric() {
+    List<Integer> toAdd = Arrays.asList(1, 2);
+    assertTrue(this.set.addAll(toAdd));
+
+    assertTrue(this.set.contains(1));
+    assertTrue(this.set.contains(2));
+  }
+
+  @Test
+  public void addAllNoChange() {
+    this.set.add(1);
+    this.set.add(2);
+    List<Integer> toAdd = Arrays.asList(1, 2);
+    assertFalse(this.set.addAll(toAdd));
+  }
+
+  @Test
+  public void addAllSmallIntegerSet() {
+
+  }
+
+  @Test
+  public void testClone() {
+    this.set.add(1);
+
+    @SuppressWarnings("unchecked")
+    Set<Integer> clone = (Set<Integer>) ((SmallIntegerSet) this.set).clone();
+    assertTrue(clone.contains(1));
+
+    clone.add(2);
+
+    assertTrue(clone.contains(2));
+    assertEquals(2, clone.size());
+    assertFalse(this.set.contains(2));
+    assertEquals(1, this.set.size());
   }
 
   @Test
