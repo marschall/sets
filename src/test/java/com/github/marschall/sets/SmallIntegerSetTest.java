@@ -118,6 +118,22 @@ public class SmallIntegerSetTest {
   }
 
   @Test
+  public void removeOutOfRange() {
+    assertFalse(this.set.remove(SmallIntegerSet.MIN_VALUE - 1));
+    assertFalse(this.set.remove(SmallIntegerSet.MAX_VALUE + 1));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void removeNull() {
+    this.set.remove(null);
+  }
+
+  @Test(expected = ClassCastException.class)
+  public void removeString() {
+    this.set.remove("String");
+  }
+
+  @Test
   public void testClone() {
     this.set.add(1);
 
