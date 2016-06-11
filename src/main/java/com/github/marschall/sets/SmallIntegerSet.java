@@ -53,7 +53,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
       return false;
     }
     long before = this.values;
-    long after = this.values | (1L << i);
+    long after = this.values & ~(1L << i);
     this.values = after;
     return before != after;
   }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,7 +91,30 @@ public class SmallIntegerSetTest {
 
   @Test
   public void addAllSmallIntegerSet() {
+    // TODO
+  }
 
+  @Test
+  public void remove() {
+    IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
+      .boxed()
+      .forEach(this.set::add);
+
+
+
+    for (int i = SmallIntegerSet.MIN_VALUE; i <= SmallIntegerSet.MAX_VALUE; i++) {
+      int expectedSize = (SmallIntegerSet.MAX_VALUE - SmallIntegerSet.MIN_VALUE) - i + 1;
+      assertEquals(expectedSize, this.set.size());
+
+      assertTrue(this.set.contains(i));
+      assertTrue(this.set.remove(i));
+      assertFalse(this.set.remove(i));
+      assertFalse(this.set.contains(i));
+
+      assertEquals(expectedSize - 1, this.set.size());
+    }
+
+    assertTrue(this.set.isEmpty());
   }
 
   @Test
