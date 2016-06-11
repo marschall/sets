@@ -19,6 +19,8 @@ import java.util.function.Consumer;
  * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
  */
 public final class SmallIntegerSet implements Set<Integer>, Serializable, Cloneable {
+  // TODO implement SortedSet
+  // TODO implement NavigableSet
 
   private static final long serialVersionUID = 1L;
 
@@ -43,6 +45,19 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     return before != after;
   }
 
+  private boolean unset(int i) {
+    if (i < MIN_VALUE) {
+      return false;
+    }
+    if (i > MAX_VALUE) {
+      return false;
+    }
+    long before = this.values;
+    long after = this.values | (1L << i);
+    this.values = after;
+    return before != after;
+  }
+
   private boolean isSet(int i) {
     if (i < MIN_VALUE) {
       return false;
@@ -53,7 +68,6 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     return (this.values & (1L << i)) != 0;
   }
 
-
   public static boolean isSupported(int i) {
     return i >= MIN_VALUE && i <= MAX_VALUE;
   }
@@ -63,7 +77,6 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
       throw new IllegalArgumentException();
     }
   }
-
 
   @Override
   public int size() {
@@ -85,7 +98,6 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     // TODO Auto-generated method stub
     return null;
   }
-
 
   @Override
   public void forEach(Consumer<? super Integer> action) {
@@ -122,13 +134,12 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public boolean remove(Object o) {
-    // TODO Auto-generated method stub
-    return false;
+    return this.unset((Integer) o);
   }
 
   @Override
   public boolean containsAll(Collection<?> c) {
-    // TODO fast patch for small integer set
+    // TODO fast path for small integer set
     for (Object each : c) {
       if (!this.contains(each)) {
         return false;
@@ -139,7 +150,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public boolean addAll(Collection<? extends Integer> c) {
-    // TODO fast patch for small integer set
+    // TODO fast path for small integer set
     boolean changed = false;
     for (Integer each : c) {
       changed |= this.add(each);
@@ -149,13 +160,14 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public boolean retainAll(Collection<?> c) {
+    // TODO fast path for small integer set
     // TODO Auto-generated method stub
     return false;
   }
 
   @Override
   public boolean removeAll(Collection<?> c) {
-    // TODO fast patch for small integer set
+    // TODO fast path for small integer set
     boolean changed = false;
     for (Object each : c) {
       changed |= this.remove(each);
