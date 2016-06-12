@@ -1,6 +1,7 @@
 package com.github.marschall.sets;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -142,9 +143,25 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T[] toArray(T[] a) {
-    // TODO Auto-generated method stub
-    return null;
+    int size = this.size();
+    T[] result;
+    if (a.length < size) {
+      result = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+    } else {
+      result = a;
+      if (a.length > size) {
+        a[size] = null;
+      }
+    }
+    int current = 0;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSetNoCheck(i)) {
+        result[current++] = (T) (Integer) i;
+      }
+    }
+    return result;
   }
 
   @Override

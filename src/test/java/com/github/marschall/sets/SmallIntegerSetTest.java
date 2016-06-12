@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -203,6 +204,45 @@ public class SmallIntegerSetTest {
     this.set.forEach(seen::add);
 
     assertEquals(Arrays.asList(9, 12), seen);
+  }
+
+
+
+  @Test
+  public void toArrayArrayArgument() {
+    this.set.add(9);
+    this.set.add(12);
+
+    Object[] result = this.set.toArray(new Integer[0]);
+    assertArrayEquals(new Object[] {9, 12}, result);
+
+    result = this.set.toArray(new Integer[2]);
+    assertArrayEquals(new Object[] {9, 12}, result);
+  }
+
+  @Test
+  public void toArrayArrayArgumentSetNull() {
+    Object[] array = new Object[4];
+    Arrays.fill(array, 1);
+
+    this.set.add(9);
+    this.set.add(12);
+
+    Object[] result = this.set.toArray(array);
+    assertSame(array, result);
+
+    assertArrayEquals(new Object[] {9, 12, null, 1}, result);
+  }
+
+  @Test
+  public void toArrayArrayArgumentKeepComponentType() {
+    this.set.add(9);
+
+    Object[] result = this.set.toArray(new Object[0]);
+    assertEquals(Object.class, result.getClass().getComponentType());
+
+    result = this.set.toArray(new Integer[0]);
+    assertEquals(Integer.class, result.getClass().getComponentType());
   }
 
   @Test
