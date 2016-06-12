@@ -310,12 +310,17 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   final class SmallIntegerSetIterator implements Iterator<Integer> {
 
     /**
+     * Marks the end of the iteration has been reached.
+     */
+    private static final int END = -1;
+
+    /**
      * Index of the next read, -1 means end reached.
      */
-    private int nextInex;
+    private int nextIndex;
 
     SmallIntegerSetIterator() {
-      this.nextInex = findNextIndex(0);
+      this.nextIndex = findNextIndex(0);
     }
 
     private int findNextIndex(int initial) {
@@ -324,12 +329,12 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
           return i;
         }
       }
-      return -1;
+      return END;
     }
 
     @Override
     public boolean hasNext() {
-      return this.nextInex != -1;
+      return this.nextIndex != END;
     }
 
     @Override
@@ -337,8 +342,8 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      Integer next = nextInex;
-      this.nextInex = findNextIndex(this.nextInex + 1);
+      Integer next = nextIndex;
+      this.nextIndex = findNextIndex(this.nextIndex + 1);
       return next;
     }
 
@@ -353,13 +358,13 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
       if (!this.hasNext()) {
         return;
       }
-      for (int i = this.nextInex; i <= MAX_VALUE; ++i) {
+      for (int i = this.nextIndex; i <= MAX_VALUE; ++i) {
         if (isSetNoCheck(i)) {
-          // an exception will prevent nextInex from being updated
+          // an exception will prevent nextIndex from being updated
           action.accept(i);
         }
       }
-      this.nextInex = -1;
+      this.nextIndex = END;
     }
 
   }
