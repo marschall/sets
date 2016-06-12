@@ -150,6 +150,35 @@ public class SmallIntegerSetTest {
   }
 
   @Test
+  public void removeAll() {
+    List<Integer> toRemove = Arrays.asList(9, 12, 13);
+
+    assertFalse(this.set.removeAll(toRemove));
+
+    this.set.addAll(Arrays.asList(9, 12, 18, 24));
+
+    assertTrue(this.set.removeAll(toRemove));
+
+    assertFalse(this.set.contains(9));
+    assertFalse(this.set.contains(12));
+    assertFalse(this.set.contains(13));
+    assertTrue(this.set.contains(18));
+    assertTrue(this.set.contains(24));
+
+    assertFalse(this.set.removeAll(toRemove));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void removeAllNull() {
+    this.set.removeAll(Arrays.asList(9, null));
+  }
+
+  @Test(expected = ClassCastException.class)
+  public void removeAllString() {
+    this.set.removeAll(Arrays.asList(9, "String"));
+  }
+
+  @Test
   public void forEach() {
     this.set.add(9);
     this.set.add(12);
