@@ -13,8 +13,7 @@ import java.util.function.Consumer;
  *
  * <p>Only supports values from {@value #MIN_VALUE} to {@value #MAX_VALUE}.
  * Uses the same amount of memory as a single {@link Long} for the entire
- * {@link Set} even if the it contains 64 elements. On HotSpot a {@link Long}
- * uses the same amount of memory as an {@link Integer}.</p>
+ * {@link Set} even if the it contains 64 elements.</p>
  *
  * <p>This set does not support {@code null} elements.</p>
  *
