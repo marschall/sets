@@ -6,12 +6,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
@@ -330,6 +333,89 @@ public class SmallIntegerSetTest {
     equalSet.add(12);
 
     assertEquals(equalSet.toString(), this.set.toString());
+  }
+
+  @Test
+  public void iteratorEdgeCases() {
+    assertEquals(Collections.emptyList(), toList(this.set.iterator()));
+
+    this.set.add(SmallIntegerSet.MIN_VALUE);
+    assertEquals(Arrays.asList(SmallIntegerSet.MIN_VALUE), toList(this.set.iterator()));
+
+    this.set.clear();
+
+    this.set.add(SmallIntegerSet.MAX_VALUE);
+    assertEquals(Arrays.asList(SmallIntegerSet.MAX_VALUE), toList(this.set.iterator()));
+
+    this.set.add(SmallIntegerSet.MIN_VALUE);
+    assertEquals(Arrays.asList(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE), toList(this.set.iterator()));
+  }
+
+
+
+  @Test
+  public void emptyIteratorSemantics() {
+    assertFalse(this.set.iterator().hasNext());
+
+    try {
+      this.set.iterator().next();
+      fail("iterator should not have next");
+    } catch (NoSuchElementException e) {
+      // should reach here
+    }
+  }
+
+  @Test
+  public void oneElementIteratorSemantics() {
+    this.set.add(1);
+    Iterator<Integer> iterator = this.set.iterator();
+    assertTrue(iterator.hasNext());
+    assertEquals(Integer.valueOf(1), iterator.next());
+    assertFalse(iterator.hasNext());
+    try {
+      iterator.next();
+      fail("iterator should not have next");
+    } catch (NoSuchElementException e) {
+      // should reach here
+    }
+  }
+
+  @Test
+  public void forEachRemainingFromStart() {
+    this.set.addAll(Arrays.asList(11, 22));
+    Iterator<Integer> iterator = this.set.iterator();
+
+    List<Integer> acc = new ArrayList<>(2);
+    iterator.forEachRemaining(acc::add);
+
+    assertEquals(Arrays.asList(11, 22), acc);
+    assertFalse(iterator.hasNext());
+  }
+
+  @Test
+  public void forEachRemainingSkipOne() {
+    this.set.addAll(Arrays.asList(11, 22));
+    Iterator<Integer> iterator = this.set.iterator();
+    iterator.next();
+
+    List<Integer> acc = new ArrayList<>(1);
+    iterator.forEachRemaining(acc::add);
+
+    assertEquals(Collections.singletonList(22), acc);
+    assertFalse(iterator.hasNext());
+  }
+
+  @Test
+  public void forEachRemainingEmpty() {
+    this.set.iterator().forEachRemaining(e -> fail("should not have any more elements"));
+  }
+
+  private static <T> List<T> toList(Iterator<T> iterator) {
+    List<T> result = new ArrayList<>();
+    while (iterator.hasNext()) {
+      result.add(iterator.next());
+    }
+    return result;
   }
 
   @Test

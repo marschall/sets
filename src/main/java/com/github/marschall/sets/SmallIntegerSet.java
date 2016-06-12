@@ -3,6 +3,7 @@ package com.github.marschall.sets;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -14,9 +15,13 @@ import java.util.function.Consumer;
  * {@link Set} even if the it contains 64 elements. On HotSpot a {@link Long}
  * uses the same amount of memory as an {@link Integer}.</p>
  *
- * <p>Does not support {@code null} elements.</p>
+ * <p>This set does not support {@code null} elements.</p>
+ *
+ * <p>This keeps the elements in their natural order.</p>
  *
  * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
+ *
+ * <p>This set is not thread safe.</p>
  */
 public final class SmallIntegerSet implements Set<Integer>, Serializable, Cloneable {
   // TODO implement SortedSet
@@ -77,6 +82,10 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     if (i > MAX_VALUE) {
       return false;
     }
+    return isSetNoCheck(i);
+  }
+
+  private boolean isSetNoCheck(int i) {
     return (this.values & (1L << i)) != 0;
   }
 
@@ -107,14 +116,13 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public Iterator<Integer> iterator() {
-    // TODO Auto-generated method stub
-    return null;
+    return new SmallIntegerSetIterator();
   }
 
   @Override
   public void forEach(Consumer<? super Integer> action) {
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSet(i)) {
+      if (this.isSetNoCheck(i)) {
         action.accept(i);
       }
     }
@@ -126,7 +134,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     Object[] result = new Object[this.size()];
     int current = 0;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSet(i)) {
+      if (this.isSetNoCheck(i)) {
         result[current++] = i;
       }
     }
@@ -166,7 +174,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
       if (!(each instanceof Integer)) {
         return false;
       }
-      if (!this.contains(each)) {
+      if (!this.isSet((Integer) each)) {
         return false;
       }
     }
@@ -188,7 +196,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     // TODO fast path for small integer set
     boolean modified = false;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSet(i) && !c.contains(i)) {
+      if (this.isSetNoCheck(i) && !c.contains(i)) {
         this.unset(i);
         modified = true;
       }
@@ -220,7 +228,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     builder.append('[');
     boolean first = true;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSet(i)) {
+      if (this.isSetNoCheck(i)) {
         if (!first) {
           builder.append(',').append(' ');
         } else {
@@ -237,7 +245,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     int toStringSize = 2; // []
     boolean first = true;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSet(i)) {
+      if (this.isSetNoCheck(i)) {
         if (!first) {
           toStringSize += 2; // ", "
         } else {
@@ -259,7 +267,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     // as unordered sets
     int hashCode = 0;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSet(i)) {
+      if (this.isSetNoCheck(i)) {
         hashCode += i;
       }
     }
@@ -297,6 +305,63 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
       // this shouldn't happen, since we are Cloneable
       throw new InternalError(e);
     }
+  }
+
+  final class SmallIntegerSetIterator implements Iterator<Integer> {
+
+    /**
+     * Index of the next read, -1 means end reached.
+     */
+    private int nextInex;
+
+    SmallIntegerSetIterator() {
+      this.nextInex = findNextIndex(0);
+    }
+
+    private int findNextIndex(int initial) {
+      for (int i = initial; i <= MAX_VALUE; ++i) {
+        if (isSetNoCheck(i)) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return this.nextInex != -1;
+    }
+
+    @Override
+    public Integer next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+      Integer next = nextInex;
+      this.nextInex = findNextIndex(this.nextInex + 1);
+      return next;
+    }
+
+    @Override
+    public void remove() {
+      // TODO Auto-generated method stub
+      Iterator.super.remove();
+    }
+
+    @Override
+    public void forEachRemaining(Consumer<? super Integer> action) {
+      if (!this.hasNext()) {
+        return;
+      }
+      for (int i = this.nextInex; i <= MAX_VALUE; ++i) {
+        if (isSetNoCheck(i)) {
+          // an exception will prevent nextInex from being updated
+          action.accept(i);
+        }
+      }
+      this.nextInex = -1;
+    }
+
   }
 
 }
