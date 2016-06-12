@@ -3,14 +3,17 @@ package com.github.marschall.sets;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
@@ -179,6 +182,112 @@ public class SmallIntegerSetTest {
     assertEquals(2, clone.size());
     assertFalse(this.set.contains(2));
     assertEquals(1, this.set.size());
+  }
+
+  @Test
+  public void testHashCode() {
+    this.set.add(9);
+    this.set.add(12);
+
+    Set<Integer> equalSet1 = new HashSet<>(4);
+    equalSet1.add(9);
+    equalSet1.add(12);
+
+    Set<Integer> equalSet2 = new TreeSet<>();
+    equalSet2.add(9);
+    equalSet2.add(12);
+
+    assertEquals(this.set.hashCode(), equalSet1.hashCode());
+    assertEquals(this.set.hashCode(), equalSet2.hashCode());
+  }
+
+  @Test
+  public void testEquals() {
+    assertEquals(this.set, Collections.emptySet());
+    assertEquals(Collections.emptySet(), this.set);
+
+    this.set.add(9);
+    this.set.add(12);
+
+    Set<Integer> equalSet1 = new HashSet<>(4);
+    equalSet1.add(9);
+    equalSet1.add(12);
+
+    Set<Integer> equalSet2 = new TreeSet<>();
+    equalSet2.add(9);
+    equalSet2.add(12);
+
+    Set<Integer> equalSet3 = new SmallIntegerSet();
+    equalSet3.add(9);
+    equalSet3.add(12);
+
+    assertEquals(this.set, this.set);
+
+    assertEquals(this.set, equalSet1);
+    assertEquals(this.set, equalSet2);
+
+    assertEquals(equalSet1, this.set);
+    assertEquals(equalSet2, this.set);
+
+    assertEquals(equalSet3, this.set);
+    assertEquals(this.set, equalSet3);
+  }
+
+  @Test
+  public void testNotEquals() {
+    this.set.add(9);
+    this.set.add(12);
+
+    assertNotEquals(this.set, Arrays.asList(9, 12));
+    assertNotEquals(this.set, Arrays.asList(9, 12, 13));
+    assertNotEquals(this.set, Arrays.asList(9));
+
+    assertNotEquals(Arrays.asList(9, 12), this.set);
+    assertNotEquals(Arrays.asList(9, 12, 13), this.set);
+    assertNotEquals(Arrays.asList(9), this.set);
+
+    Set<Object> notEqualSet1 = new HashSet<>(4);
+    notEqualSet1.add(9);
+    notEqualSet1.add("12");
+
+    assertNotEquals(this.set, notEqualSet1);
+    assertNotEquals(notEqualSet1, this.set);
+
+    Set<Object> notEqualSet2 = new HashSet<>(4);
+    notEqualSet2.add(9);
+    notEqualSet2.add(null);
+
+    assertNotEquals(this.set, notEqualSet2);
+    assertNotEquals(notEqualSet2, this.set);
+
+    Set<Object> notEqualSet3 = new HashSet<>(4);
+    notEqualSet3.add(9);
+    notEqualSet3.add(13);
+
+    assertNotEquals(this.set, notEqualSet3);
+    assertNotEquals(notEqualSet3, this.set);
+
+    Set<Object> notEqualSet4 = new HashSet<>(4);
+    notEqualSet4.add(9);
+    notEqualSet4.add(12);
+    notEqualSet4.add(13);
+
+    assertNotEquals(this.set, notEqualSet4);
+    assertNotEquals(notEqualSet4, this.set);
+  }
+
+  @Test
+  public void testToString() {
+    assertEquals(Collections.emptySet().toString(), this.set.toString());
+
+    this.set.add(9);
+    this.set.add(12);
+
+    Set<Integer> equalSet = new TreeSet<>();
+    equalSet.add(9);
+    equalSet.add(12);
+
+    assertEquals(equalSet.toString(), this.set.toString());
   }
 
   @Test

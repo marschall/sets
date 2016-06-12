@@ -148,6 +148,19 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     return true;
   }
 
+  private boolean containsAllNonThrowing(Collection<?> c) {
+    // avoids exceptions in the case of null or anything but Integer
+    for (Object each : c) {
+      if (!(each instanceof Integer)) {
+        return false;
+      }
+      if (!this.contains(each)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @Override
   public boolean addAll(Collection<? extends Integer> c) {
     // TODO fast path for small integer set
@@ -182,20 +195,76 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public String toString() {
-    // TODO Auto-generated method stub
-    return super.toString();
+    if (this.isEmpty()) {
+      return "[]";
+    }
+    StringBuilder builder = new StringBuilder(this.estimateToStringSize());
+    builder.append('[');
+    boolean first = true;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSet(i)) {
+        if (!first) {
+          builder.append(',').append(' ');
+        } else {
+          first = false;
+        }
+        builder.append(i);
+      }
+    }
+    builder.append(']');
+    return builder.toString();
+  }
+
+  private int estimateToStringSize() {
+    int toStringSize = 2; // []
+    boolean first = true;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSet(i)) {
+        if (!first) {
+          toStringSize += 2; // ", "
+        } else {
+          first = false;
+        }
+        if (i < 10) {
+          toStringSize += 1;
+        } else {
+          toStringSize += 2;
+        }
+      }
+    }
+    return toStringSize;
   }
 
   @Override
   public int hashCode() {
-    // TODO Auto-generated method stub
-    return super.hashCode();
+    // took contract form AbstractSet, has to produce the same results
+    // as unordered sets
+    int hashCode = 0;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSet(i)) {
+        hashCode += i;
+      }
+    }
+    return hashCode;
   }
 
   @Override
   public boolean equals(Object obj) {
-    // TODO Auto-generated method stub
-    return super.equals(obj);
+    if (obj == this) {
+      return true;
+    }
+    if (!(obj instanceof Set)) {
+      return false;
+    }
+    if (obj instanceof SmallIntegerSet) {
+      return this.values == ((SmallIntegerSet) obj).values;
+    }
+
+    Set<?> other = (Set<?>) obj;
+    if (this.size() != other.size()) {
+      return false;
+    }
+    return containsAllNonThrowing(other);
   }
 
   /**
