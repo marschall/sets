@@ -179,6 +179,19 @@ public class SmallIntegerSetTest {
   }
 
   @Test
+  public void retainAll() {
+    this.set.addAll(Arrays.asList(9, 12));
+
+    assertTrue(this.set.retainAll(Arrays.asList(12, 24)));
+    assertEquals(1, this.set.size());
+    assertFalse(this.set.contains(9));
+    assertTrue(this.set.contains(12));
+    assertFalse(this.set.contains(24));
+
+    assertFalse(this.set.retainAll(Arrays.asList(12, 24)));
+  }
+
+  @Test
   public void forEach() {
     this.set.add(9);
     this.set.add(12);

@@ -9,10 +9,10 @@ import java.util.function.Consumer;
 /**
  * A set for small integers.
  *
- * <p>Only supports values from {@value #MIN_VALUE} to {@value #MIN_VALUE}
- * but only used the same amount of memory as a sing {@link Long} which
- * is the same as an {@link Integer} on HotSpot even if the map contains
- * 64 elements.</p>
+ * <p>Only supports values from {@value #MIN_VALUE} to {@value #MAX_VALUE}.
+ * Uses the same amount of memory as a single {@link Long} for the entire
+ * {@link Set} even if the it contains 64 elements. On HotSpot a {@link Long}
+ * uses the same amount of memory as an {@link Integer}.</p>
  *
  * <p>Does not support {@code null} elements.</p>
  *
@@ -24,8 +24,20 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Smallest value supported by this {@link Set}.
+   *
+   * <p>Any attempt at inserting a smaller value will throw a
+   * {@link IllegalArgumentException}.</p>
+   */
   public static final int MIN_VALUE = 0;
 
+  /**
+   * Largest value supported by this {@link Set}.
+   *
+   * <p>Any attempt at inserting a larger value will throw a
+   * {@link IllegalArgumentException}.</p>
+   */
   public static final int MAX_VALUE = 63;
 
   private long values;
@@ -174,8 +186,14 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   @Override
   public boolean retainAll(Collection<?> c) {
     // TODO fast path for small integer set
-    // TODO Auto-generated method stub
-    return false;
+    boolean modified = false;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (this.isSet(i) && !c.contains(i)) {
+        this.unset(i);
+        modified = true;
+      }
+    }
+    return modified;
   }
 
   @Override
