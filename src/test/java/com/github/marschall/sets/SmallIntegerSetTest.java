@@ -1,10 +1,12 @@
 package com.github.marschall.sets;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +62,17 @@ public class SmallIntegerSetTest {
   @Test(expected = NullPointerException.class)
   public void addNull() {
     this.set.add(null);
+  }
+
+  @Test
+  public void containsAll() {
+    this.set.add(9);
+    this.set.add(12);
+    this.set.add(23);
+
+    assertTrue(this.set.containsAll(Arrays.asList(9, 12)));
+    assertFalse(this.set.containsAll(Arrays.asList(9, 13)));
+    assertFalse(this.set.containsAll(Arrays.asList(9, 12, 64)));
   }
 
   @Test(expected = NullPointerException.class)
@@ -131,6 +144,25 @@ public class SmallIntegerSetTest {
   @Test(expected = ClassCastException.class)
   public void removeString() {
     this.set.remove("String");
+  }
+
+  @Test
+  public void forEach() {
+    this.set.add(9);
+    this.set.add(12);
+
+    List<Integer> seen = new ArrayList<>(2);
+    this.set.forEach(seen::add);
+
+    assertEquals(Arrays.asList(9, 12), seen);
+  }
+
+  @Test
+  public void toArrayNoArgument() {
+    this.set.add(9);
+    this.set.add(12);
+
+    assertArrayEquals(new Object[] {9, 12}, this.set.toArray());
   }
 
   @Test
