@@ -205,6 +205,10 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     if (c instanceof SmallIntegerSet) {
       return addAll((SmallIntegerSet) c);
     }
+    return addAllGeneric(c);
+  }
+
+  private boolean addAllGeneric(Collection<? extends Integer> c) {
     boolean changed = false;
     for (Integer each : c) {
       changed |= this.add(each);
@@ -223,6 +227,10 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     if (c instanceof SmallIntegerSet) {
       return retainAll((SmallIntegerSet) c);
     }
+    return retainAllGeneric(c);
+  }
+
+  private boolean retainAllGeneric(Collection<?> c) {
     boolean modified = false;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
       if (this.isSetNoCheck(i) && !c.contains(i)) {
@@ -244,6 +252,10 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     if (c instanceof SmallIntegerSet) {
       return removeAll((SmallIntegerSet) c);
     }
+    return removeAllGeneric(c);
+  }
+
+  private boolean removeAllGeneric(Collection<?> c) {
     boolean changed = false;
     for (Object each : c) {
       changed |= this.remove(each);
