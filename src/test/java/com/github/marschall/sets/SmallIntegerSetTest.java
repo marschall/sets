@@ -82,6 +82,25 @@ public class SmallIntegerSetTest {
     assertFalse(this.set.containsAll(Arrays.asList(9, 12, 64)));
   }
 
+  @Test
+  public void containsAllSmallIntegerSet() {
+    this.set.add(9);
+    this.set.add(12);
+    this.set.add(23);
+
+    SmallIntegerSet other = new SmallIntegerSet();
+    other.addAll(Arrays.asList(9, 12));
+    assertTrue(this.set.containsAll(other));
+
+    other.clear();
+    other.addAll(Arrays.asList(9, 13));
+    assertFalse(this.set.containsAll(other));
+
+    other.clear();
+    other.addAll(Arrays.asList(9, 12, 63));
+    assertFalse(this.set.containsAll(other));
+  }
+
   @Test(expected = NullPointerException.class)
   public void containsNull() {
     this.set.contains(null);

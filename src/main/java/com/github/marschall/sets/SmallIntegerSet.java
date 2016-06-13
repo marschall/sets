@@ -19,9 +19,13 @@ import java.util.function.Consumer;
  *
  * <p>This set keeps the elements in their natural order.</p>
  *
- * <p>All the set operations {@link #addAll(Collection)},
- * {@link #removeAll(Collection)} and {@link #retainAll(Collection)}
- * run in constant time when the argument is a SmallIntegerSet.</p>
+ * <p>{@link #contains(Object)}, {@link #add(Integer)}, {@link #remove(Object)}
+ * and {@link #clear()} run in constant time.</p>
+ *
+ * <p>The operations {@link #addAll(Collection)},
+ * {@link #removeAll(Collection)}, {@link #retainAll(Collection)}
+ * and {@link #containsAll(Collection)} run in constant time when the argument
+ * is a {@link SmallIntegerSet}.</p>
  *
  * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
  *
@@ -178,13 +182,24 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public boolean containsAll(Collection<?> c) {
-    // TODO fast path for small integer set
+    if (c instanceof SmallIntegerSet) {
+      return containsAll((SmallIntegerSet) c);
+    }
+    return containsAllGeneric(c);
+  }
+
+  private boolean containsAllGeneric(Collection<?> c) {
     for (Object each : c) {
       if (!this.contains(each)) {
         return false;
       }
     }
     return true;
+  }
+
+  private boolean containsAll(SmallIntegerSet other) {
+    long otherValues = other.values;
+    return (this.values & otherValues) == otherValues;
   }
 
   private boolean containsAllNonThrowing(Collection<?> c) {
