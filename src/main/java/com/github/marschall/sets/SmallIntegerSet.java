@@ -17,7 +17,11 @@ import java.util.function.Consumer;
  *
  * <p>This set does not support {@code null} elements.</p>
  *
- * <p>This keeps the elements in their natural order.</p>
+ * <p>This set keeps the elements in their natural order.</p>
+ *
+ * <p>All the set operations {@link #addAll(Collection)},
+ * {@link #removeAll(Collection)} and {@link #retainAll(Collection)}
+ * run in constant time when the argument is a SmallIntegerSet.</p>
  *
  * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
  *
@@ -57,9 +61,8 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   private boolean set(int i) {
     checkSupported(i);
     long before = this.values;
-    long after = this.values | (1L << i);
-    this.values = after;
-    return before != after;
+    this.values = this.values | (1L << i);
+    return before != this.values;
   }
 
   private boolean unset(int i) {
@@ -199,7 +202,9 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public boolean addAll(Collection<? extends Integer> c) {
-    // TODO fast path for small integer set
+    if (c instanceof SmallIntegerSet) {
+      return addAll((SmallIntegerSet) c);
+    }
     boolean changed = false;
     for (Integer each : c) {
       changed |= this.add(each);
@@ -207,9 +212,17 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     return changed;
   }
 
+  private boolean addAll(SmallIntegerSet other) {
+    long before = this.values;
+    this.values |= other.values;
+    return before != this.values;
+  }
+
   @Override
   public boolean retainAll(Collection<?> c) {
-    // TODO fast path for small integer set
+    if (c instanceof SmallIntegerSet) {
+      return retainAll((SmallIntegerSet) c);
+    }
     boolean modified = false;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
       if (this.isSetNoCheck(i) && !c.contains(i)) {
@@ -220,14 +233,28 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     return modified;
   }
 
+  private boolean retainAll(SmallIntegerSet other) {
+    long before = this.values;
+    this.values &= other.values;
+    return before != this.values;
+  }
+
   @Override
   public boolean removeAll(Collection<?> c) {
-    // TODO fast path for small integer set
+    if (c instanceof SmallIntegerSet) {
+      return removeAll((SmallIntegerSet) c);
+    }
     boolean changed = false;
     for (Object each : c) {
       changed |= this.remove(each);
     }
     return changed;
+  }
+
+  private boolean removeAll(SmallIntegerSet other) {
+    long before = this.values;
+    this.values &= ~other.values;
+    return before != this.values;
   }
 
   @Override

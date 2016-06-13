@@ -111,7 +111,20 @@ public class SmallIntegerSetTest {
 
   @Test
   public void addAllSmallIntegerSet() {
-    // TODO
+    this.set.addAll(Arrays.asList(1, 2, 10));
+
+    SmallIntegerSet c = new SmallIntegerSet();
+    c.addAll(Arrays.asList(10, 20, 21));
+
+    assertTrue(this.set.addAll(c));
+    assertEquals(5, this.set.size());
+    assertTrue(this.set.contains(1));
+    assertTrue(this.set.contains(2));
+    assertTrue(this.set.contains(10));
+    assertTrue(this.set.contains(20));
+    assertTrue(this.set.contains(21));
+
+    assertFalse(this.set.addAll(c));
   }
 
   @Test
@@ -172,6 +185,23 @@ public class SmallIntegerSetTest {
     assertFalse(this.set.removeAll(toRemove));
   }
 
+  @Test
+  public void removeAllSmallIntegerSet() {
+    this.set.addAll(Arrays.asList(1, 9, 12));
+    SmallIntegerSet toRemove = new SmallIntegerSet();
+    toRemove.addAll(Arrays.asList(9, 12, 13));
+
+    assertTrue(this.set.removeAll(toRemove));
+
+    assertEquals(1, this.set.size());
+    assertTrue(this.set.contains(1));
+    assertFalse(this.set.contains(9));
+    assertFalse(this.set.contains(12));
+    assertFalse(this.set.contains(13));
+
+    assertFalse(this.set.removeAll(toRemove));
+  }
+
   @Test(expected = NullPointerException.class)
   public void removeAllNull() {
     this.set.removeAll(Arrays.asList(9, null));
@@ -193,6 +223,22 @@ public class SmallIntegerSetTest {
     assertFalse(this.set.contains(24));
 
     assertFalse(this.set.retainAll(Arrays.asList(12, 24)));
+  }
+
+  @Test
+  public void retainAllSmalIntegerSet() {
+    this.set.addAll(Arrays.asList(9, 12));
+
+    SmallIntegerSet toRetain = new SmallIntegerSet();
+    toRetain.addAll(Arrays.asList(12, 24));
+
+    assertTrue(this.set.retainAll(toRetain));
+    assertEquals(1, this.set.size());
+    assertFalse(this.set.contains(9));
+    assertTrue(this.set.contains(12));
+    assertFalse(this.set.contains(24));
+
+    assertFalse(this.set.retainAll(toRetain));
   }
 
   @Test
