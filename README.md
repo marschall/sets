@@ -8,7 +8,7 @@ The implementations support serialization but this has not been optimized.
 Currently includes classes:
 <dl>
 <dt>SmallIntegerSet</dt>
-<dd>Supports Integers from 0 to 63, uses the same amount of memory for the entire set as a single Long.</dd>
+<dd>Supports Integers from 0 to 63, uses the same amount of memory for the entire set as a single java.lang.Long.</dd>
 </dl>
 
 All methods are below 325 byte and should therefore HotSpot should be able to inline them if they are hot.

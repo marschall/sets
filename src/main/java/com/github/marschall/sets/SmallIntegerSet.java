@@ -3,10 +3,16 @@ package com.github.marschall.sets;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.Consumer;
+
+import com.github.marschall.sets.SmallIntegerSet.SmallIntegerSubSet;
 
 /**
  * A set for small integers.
@@ -30,9 +36,50 @@ import java.util.function.Consumer;
  * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
  *
  * <p>This set is not thread safe.</p>
+ *
+ * <h2>Footprint</h2>
+ *
+ * <a href="http://openjdk.java.net/projects/code-tools/jol/">Java Object Layout</a>
+ * reports the following sizes for HotSpot:
+ *
+ * <pre><code>
+ * ***** 32-bit VM: **********************************************************
+ * com.github.marschall.sets.SmallIntegerSet object internals:
+ *  OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+ *       0     8       (object header)                N/A
+ *       8     8  long SmallIntegerSet.values         N/A
+ * Instance size: 16 bytes
+ * Space losses: 0 bytes internal + 0 bytes external = 0 bytes total
+ *
+ * ***** 64-bit VM: **********************************************************
+ * com.github.marschall.sets.SmallIntegerSet object internals:
+ *  OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+ *       0    16       (object header)                N/A
+ *      16     8  long SmallIntegerSet.values         N/A
+ * Instance size: 24 bytes
+ * Space losses: 0 bytes internal + 0 bytes external = 0 bytes total
+ *
+ * ***** 64-bit VM, compressed references enabled: ***************************
+ * com.github.marschall.sets.SmallIntegerSet object internals:
+ *  OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+ *       0    12       (object header)                N/A
+ *      12     4       (alignment/padding gap)        N/A
+ *      16     8  long SmallIntegerSet.values         N/A
+ * Instance size: 24 bytes
+ * Space losses: 4 bytes internal + 0 bytes external = 4 bytes total
+ *
+ * ***** 64-bit VM, compressed references enabled, 16-byte align: ************
+ * com.github.marschall.sets.SmallIntegerSet object internals:
+ *  OFFSET  SIZE  TYPE DESCRIPTION                    VALUE
+ *       0    12       (object header)                N/A
+ *      12     4       (alignment/padding gap)        N/A
+ *      16     8  long SmallIntegerSet.values         N/A
+ *      24     8       (loss due to the next object alignment)
+ * Instance size: 32 bytes
+ * Space losses: 4 bytes internal + 8 bytes external = 12 bytes total
+ * </code></pre>
  */
-public final class SmallIntegerSet implements Set<Integer>, Serializable, Cloneable {
-  // TODO implement SortedSet
+public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, Cloneable {
   // TODO implement NavigableSet
 
   private static final long serialVersionUID = 1L;
@@ -93,7 +140,21 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   }
 
   private boolean isSetNoCheck(int i) {
-    return (this.values & (1L << i)) != 0;
+    return isSetNoCheck(this.values, i);
+  }
+
+  static boolean isSet(long bits, int i) {
+    if (i < MIN_VALUE) {
+      return false;
+    }
+    if (i > MAX_VALUE) {
+      return false;
+    }
+    return isSetNoCheck(bits, i);
+  }
+
+  private static boolean isSetNoCheck(long bits, int i) {
+    return (bits & (1L << i)) != 0;
   }
 
   public static boolean isSupported(int i) {
@@ -108,12 +169,20 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public int size() {
-    return Long.bitCount(this.values);
+    return size(this.values);
+  }
+
+  static int size(long bits) {
+    return Long.bitCount(bits);
   }
 
   @Override
   public boolean isEmpty() {
-    return this.values == 0;
+    return isEmpty(this.values);
+  }
+
+  static boolean isEmpty(long bits) {
+    return bits == 0;
   }
 
   @Override
@@ -128,8 +197,13 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public void forEach(Consumer<? super Integer> action) {
+    forEach(this.values, action);
+  }
+
+  static void forEach(long bits, Consumer<? super Integer> action) {
+    // TODO also check size
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSetNoCheck(i)) {
+      if (isSetNoCheck(bits, i)) {
         action.accept(i);
       }
     }
@@ -137,11 +211,15 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public Object[] toArray() {
+    return toArray(this.values);
+  }
+
+  static Object[] toArray(long bits) {
     // REVIEW discussable if it should be an Integer[]
-    Object[] result = new Object[this.size()];
+    Object[] result = new Object[size(bits)];
     int current = 0;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSetNoCheck(i)) {
+      if (isSetNoCheck(bits, i)) {
         result[current++] = i;
       }
     }
@@ -151,7 +229,12 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   @Override
   @SuppressWarnings("unchecked")
   public <T> T[] toArray(T[] a) {
-    int size = this.size();
+    return toArray(this.values, a);
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> T[] toArray(long bits, T[] a) {
+    int size = size(bits);
     T[] result;
     if (a.length < size) {
       result = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
@@ -163,11 +246,105 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     }
     int current = 0;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSetNoCheck(i)) {
+      if (isSetNoCheck(bits, i)) {
         result[current++] = (T) (Integer) i;
       }
     }
     return result;
+  }
+
+  @Override
+  public SortedSet<Integer> subSet(Integer fromElement, Integer toElement) {
+    int startInclusive = fromElement;
+    checkSupported(startInclusive);
+    int endInclusive = toElement - 1;
+    checkSupported(endInclusive);
+    if (fromElement == MIN_VALUE && endInclusive == MAX_VALUE) {
+      return this;
+    }
+    if (startInclusive > endInclusive + 1) {
+      throw new IllegalArgumentException();
+    }
+    if (startInclusive == MIN_VALUE) {
+      return headSet(toElement);
+    }
+    if (endInclusive == MAX_VALUE) {
+      return tailSet(fromElement);
+    }
+    if (endInclusive == startInclusive) {
+      return Collections.emptyNavigableSet();
+    }
+
+    long headMask = (1 << endInclusive) - 1;
+    long tailMask = ~((1 << fromElement) - 1);
+    long mask = headMask & tailMask;
+    return new SmallIntegerSubSet(mask);
+  }
+
+  @Override
+  public SortedSet<Integer> headSet(Integer toElement) {
+    int endInclusive = toElement - 1;
+    checkSupported(endInclusive);
+    if (endInclusive == MAX_VALUE) {
+      return this;
+    }
+    if (endInclusive == MIN_VALUE) {
+      return Collections.emptyNavigableSet();
+    }
+    long mask = (1 << endInclusive) - 1;
+    return new SmallIntegerHeadSet(mask);
+  }
+
+  @Override
+  public SortedSet<Integer> tailSet(Integer fromElement) {
+    checkSupported(fromElement);
+    if (fromElement == MIN_VALUE) {
+      return this;
+    }
+    long mask = ~((1 << fromElement) - 1);
+    return new SmallIntegerTailSet(mask);
+  }
+
+  @Override
+  public Comparator<? super Integer> comparator() {
+    // natural order
+    return null;
+  }
+
+  @Override
+  public Integer first() {
+    return first(this.values);
+  }
+
+  static Integer first(long bits) {
+    if (bits == 0) {
+      throw new NoSuchElementException();
+    }
+    // TODO optimize, bit twiddle
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (isSetNoCheck(bits, i)) {
+        return i;
+      }
+    }
+    throw new AssertionError();
+  }
+
+  @Override
+  public Integer last() {
+    return last(this.values);
+  }
+
+  static Integer last(long bits) {
+    if (bits == 0) {
+      throw new NoSuchElementException();
+    }
+    // TODO optimize, bit twiddle
+    for (int i = MAX_VALUE; i >= MIN_VALUE; --i) {
+      if (isSetNoCheck(bits, i)) {
+        return i;
+      }
+    }
+    throw new AssertionError();
   }
 
   @Override
@@ -203,12 +380,16 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   }
 
   private boolean containsAllNonThrowing(Collection<?> c) {
+    return containsAllNonThrowing(this.values, c);
+  }
+
+  static boolean containsAllNonThrowing(long bits, Collection<?> c) {
     // avoids exceptions in the case of null or anything but Integer
     for (Object each : c) {
       if (!(each instanceof Integer)) {
         return false;
       }
-      if (!this.isSet((Integer) each)) {
+      if (!isSet(bits, (Integer) each)) {
         return false;
       }
     }
@@ -289,16 +470,24 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     this.values = 0;
   }
 
+  void clear(long bitsToClear) {
+    this.values = this.values & ~bitsToClear;
+  }
+
   @Override
   public String toString() {
     if (this.isEmpty()) {
       return "[]";
     }
-    StringBuilder builder = new StringBuilder(this.estimateToStringSize());
+    return toStringNotEmpty(this.values);
+  }
+
+  static String toStringNotEmpty(long bits) {
+    StringBuilder builder = new StringBuilder(estimateToStringSize(bits));
     builder.append('[');
     boolean first = true;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSetNoCheck(i)) {
+      if (isSetNoCheck(bits, i)) {
         if (!first) {
           builder.append(',').append(' ');
         } else {
@@ -311,11 +500,11 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     return builder.toString();
   }
 
-  private int estimateToStringSize() {
+  private static int estimateToStringSize(long bits) {
     int toStringSize = 2; // []
     boolean first = true;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSetNoCheck(i)) {
+      if (isSetNoCheck(bits, i)) {
         if (!first) {
           toStringSize += 2; // ", "
         } else {
@@ -333,11 +522,15 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
 
   @Override
   public int hashCode() {
+    return hashCode(this.values);
+  }
+
+  static int hashCode(long bits) {
     // took contract form AbstractSet, has to produce the same results
     // as unordered sets
     int hashCode = 0;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
-      if (this.isSetNoCheck(i)) {
+      if (isSetNoCheck(bits, i)) {
         hashCode += i;
       }
     }
@@ -355,6 +548,9 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
     if (obj instanceof SmallIntegerSet) {
       return this.values == ((SmallIntegerSet) obj).values;
     }
+    if (obj instanceof AbstractSmallIntegerSubSet) {
+      return this.values == ((AbstractSmallIntegerSubSet) obj).bits();
+    }
 
     Set<?> other = (Set<?>) obj;
     if (this.size() != other.size()) {
@@ -364,7 +560,7 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
   }
 
   /**
-   * Returns a shallow copy of this {@code SmallIntegerSet} instance.
+   * Returns a copy of this {@code SmallIntegerSet} instance.
    *
    * @return a clone of this {@code SmallIntegerSet} instance
    */
@@ -435,6 +631,160 @@ public final class SmallIntegerSet implements Set<Integer>, Serializable, Clonea
         }
       }
       this.nextIndex = END;
+    }
+
+  }
+
+  abstract class AbstractSmallIntegerSubSet implements SortedSet<Integer>, Cloneable {
+
+    final long mask;
+
+    AbstractSmallIntegerSubSet(long mask) {
+      this.mask = mask;
+    }
+
+    @Override
+    public Comparator<? super Integer> comparator() {
+      return null;
+    }
+
+    long bits() {
+      return values & this.mask;
+    }
+
+    private boolean isSupported(int i) {
+      return SmallIntegerSet.isSupported(i) && (((1L << i) & this.mask) != 0);
+    }
+
+    @Override
+    public Integer first() {
+      return SmallIntegerSet.first(bits());
+    }
+
+    @Override
+    public Integer last() {
+      return SmallIntegerSet.last(bits());
+    }
+
+    @Override
+    public int size() {
+      return SmallIntegerSet.size(bits());
+    }
+
+    @Override
+    public boolean add(Integer e) {
+      if (!this.isSupported(e)) {
+        throw new IllegalArgumentException();
+      }
+      return SmallIntegerSet.this.add(e);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+      if (!this.isSupported((Integer) o)) {
+        return false;
+      }
+      return SmallIntegerSet.this.remove(o);
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return SmallIntegerSet.isEmpty(this.bits());
+    }
+
+    @Override
+    public void clear() {
+      SmallIntegerSet.this.clear(this.mask);
+    }
+
+    @Override
+    public String toString() {
+      long bits = this.bits();
+      if (SmallIntegerSet.isEmpty(bits)) {
+        return "[]";
+      }
+      return SmallIntegerSet.toStringNotEmpty(this.bits());
+    }
+
+    @Override
+    public Object[] toArray() {
+      return SmallIntegerSet.toArray(this.bits());
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+      return SmallIntegerSet.toArray(this.bits(), a);
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return SmallIntegerSet.isSet(this.bits(), (Integer) o);
+    }
+
+    @Override
+    public int hashCode() {
+      return SmallIntegerSet.hashCode(this.bits());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+      if (obj == this) {
+        return true;
+      }
+      if (!(obj instanceof Set)) {
+        return false;
+      }
+      if (obj instanceof SmallIntegerSet) {
+        return this.bits() == ((SmallIntegerSet) obj).values;
+      }
+      if (obj instanceof AbstractSmallIntegerSubSet) {
+        return this.bits() == ((AbstractSmallIntegerSubSet) obj).bits();
+      }
+
+      Set<?> other = (Set<?>) obj;
+      if (this.size() != other.size()) {
+        return false;
+      }
+      return containsAllNonThrowing(this.bits(), other);
+    }
+
+    public Object clone() {
+      try {
+        return super.clone();
+      } catch (CloneNotSupportedException e) {
+        // this shouldn't happen, since we are Cloneable
+        throw new InternalError(e);
+      }
+    }
+
+    @Override
+    public void forEach(Consumer<? super Integer> action) {
+      SmallIntegerSet.forEach(this.bits(), action);
+    }
+
+  }
+
+  final class SmallIntegerHeadSet extends AbstractSmallIntegerSubSet {
+
+    SmallIntegerHeadSet(long mask) {
+      super(mask);
+    }
+
+  }
+
+  final class SmallIntegerTailSet extends AbstractSmallIntegerSubSet {
+
+    SmallIntegerTailSet(long mask) {
+      super(mask);
+    }
+
+  }
+
+  final class SmallIntegerSubSet extends AbstractSmallIntegerSubSet {
+
+    SmallIntegerSubSet(long mask) {
+      super(mask);
     }
 
   }
