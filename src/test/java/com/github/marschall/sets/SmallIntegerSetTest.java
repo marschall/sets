@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
@@ -25,7 +26,7 @@ import org.junit.Test;
 
 public class SmallIntegerSetTest {
 
-  private Set<Integer> set;
+  private SortedSet<Integer> set;
 
   @Before
   public void setUp() {
@@ -521,6 +522,34 @@ public class SmallIntegerSetTest {
       result.add(iterator.next());
     }
     return result;
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public void noFirst() {
+    this.set.first();
+  }
+
+  @Test
+  public void first() {
+    this.set.add(SmallIntegerSet.MAX_VALUE);
+    assertEquals(Integer.valueOf(SmallIntegerSet.MAX_VALUE), this.set.first());
+
+    this.set.add(SmallIntegerSet.MIN_VALUE);
+    assertEquals(Integer.valueOf(SmallIntegerSet.MIN_VALUE), this.set.first());
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public void noLast() {
+    this.set.last();
+  }
+
+  @Test
+  public void last() {
+    this.set.add(SmallIntegerSet.MIN_VALUE);
+    assertEquals(Integer.valueOf(SmallIntegerSet.MIN_VALUE), this.set.last());
+
+    this.set.add(SmallIntegerSet.MAX_VALUE);
+    assertEquals(Integer.valueOf(SmallIntegerSet.MAX_VALUE), this.set.last());
   }
 
   @Test
