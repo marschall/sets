@@ -40,6 +40,8 @@ import com.github.marschall.sets.SmallIntegerSet.SmallIntegerSubSet;
  *
  * <p>This set is not thread safe.</p>
  *
+ * <p>This set is not fail-fast.</p>
+ *
  * <h2>Footprint</h2>
  *
  * <a href="http://openjdk.java.net/projects/code-tools/jol/">Java Object Layout</a>
@@ -103,7 +105,12 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
    */
   public static final int MAX_VALUE = 63;
 
-  private static final long[] INDICES = {
+  /**
+   * Indices of the one bits. Uses the trick from
+   * {@link Long#compareUnsigned(long, long)} so that
+   * {@link Arrays#binarySearch(long[], long) can be used.
+   */
+  private static final long[] ONE_BIT_INDICES = {
       0b1L + Long.MIN_VALUE,
       0b10L + Long.MIN_VALUE,
       0b100L + Long.MIN_VALUE,
@@ -231,8 +238,18 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return i >= MIN_VALUE && i <= MAX_VALUE;
   }
 
-  private void checkSupported(int i) {
+  static boolean isSupported(long mask, int i) {
+    return isSupported(i) && (((1L << i) & mask) != 0);
+  }
+
+  private static void checkSupported(int i) {
     if (!isSupported(i)) {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  static void checkSupported(long mask, int i) {
+    if (!isSupported(mask, i)) {
       throw new IllegalArgumentException();
     }
   }
@@ -391,7 +408,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       throw new NoSuchElementException();
     }
     long lowestOneBit = Long.lowestOneBit(bits);
-    return Arrays.binarySearch(INDICES, lowestOneBit + Long.MIN_VALUE);
+    return log2(lowestOneBit);
+  }
+
+  static int log2(long lowestOneBit) {
+    return Arrays.binarySearch(ONE_BIT_INDICES, lowestOneBit + Long.MIN_VALUE);
   }
 
   @Override
@@ -404,7 +425,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       throw new NoSuchElementException();
     }
     long highestOneBit = Long.highestOneBit(bits);
-    return Arrays.binarySearch(INDICES, highestOneBit + Long.MIN_VALUE);
+    return log2(highestOneBit);
   }
 
   @Override
@@ -733,10 +754,14 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
 
     @Override
     public boolean add(Integer e) {
+      this.checkSupported(e);
+      return SmallIntegerSet.this.add(e);
+    }
+
+    void checkSupported(Integer e) {
       if (!this.isSupported(e)) {
         throw new IllegalArgumentException();
       }
-      return SmallIntegerSet.this.add(e);
     }
 
     @Override
@@ -774,6 +799,27 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     @Override
     public <T> T[] toArray(T[] a) {
       return SmallIntegerSet.toArray(this.bits(), a);
+    }
+
+    @Override
+    public SortedSet<Integer> subSet(Integer fromElement, Integer toElement) {
+      this.checkSupported(fromElement);
+      this.checkSupported(toElement - 1);
+      return SmallIntegerSet.this.subSet(fromElement, toElement);
+    }
+
+    @Override
+    public SortedSet<Integer> headSet(Integer toElement) {
+      this.checkSupported(toElement - 1);
+      long lowestOneBit = Long.lowestOneBit(this.mask);
+      return SmallIntegerSet.this.subSet(log2(lowestOneBit), toElement);
+    }
+
+    @Override
+    public SortedSet<Integer> tailSet(Integer fromElement) {
+      this.checkSupported(fromElement);
+      long highestOneBit = Long.highestOneBit(this.mask);
+      return this.subSet(fromElement, log2(highestOneBit) + 1);
     }
 
     @Override
@@ -831,12 +877,24 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       super(mask);
     }
 
+    @Override
+    public SortedSet<Integer> headSet(Integer toElement) {
+      this.checkSupported(toElement - 1);
+      return SmallIntegerSet.this.headSet(toElement);
+    }
+
   }
 
   final class SmallIntegerTailSet extends AbstractSmallIntegerSubSet {
 
     SmallIntegerTailSet(long mask) {
       super(mask);
+    }
+
+    @Override
+    public SortedSet<Integer> tailSet(Integer fromElement) {
+      this.checkSupported(fromElement);
+      return SmallIntegerSet.this.tailSet(fromElement);
     }
 
   }

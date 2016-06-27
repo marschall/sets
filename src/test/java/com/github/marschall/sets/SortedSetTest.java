@@ -4,30 +4,43 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Collections;
-import java.util.NavigableSet;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-public class ReferenceTest {
+@RunWith(Parameterized.class)
+public class SortedSetTest {
+
+  private SortedSet<Integer> set;
+
+  public SortedSetTest(SortedSet<Integer> set) {
+    this.set = set;
+  }
+
+  @Parameters
+  public static Collection<Object[]> sets() {
+    return Arrays.asList(
+            new Object[] {new TreeSet<Integer>()},
+            new Object[] {new SmallIntegerSet()});
+  }
 
   @Test
   public void comparator() {
-    NavigableSet<Integer> set = new TreeSet<>();
-
     assertNull(set.comparator());
-    assertSame(Collections.reverseOrder(), set.descendingSet().comparator());
+//    assertSame(Collections.reverseOrder(), set.descendingSet().comparator());
   }
 
   @Test
   public void subSet() {
-    NavigableSet<Integer> set = new TreeSet<>();
     set.add(1);
     SortedSet<Integer> subSet = set.subSet(1, 1);
     assertEquals(0, subSet.size());
@@ -40,7 +53,6 @@ public class ReferenceTest {
 
   @Test
   public void subSetRange() {
-    NavigableSet<Integer> set = new TreeSet<>();
     set.add(1);
     set.add(2);
     set.add(3);
