@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.github.marschall.sets.SmallIntegerSet.SmallIntegerSubSet;
 
@@ -288,6 +289,19 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
         action.accept(i);
       }
     }
+  }
+
+  @Override
+  public boolean removeIf(Predicate<? super Integer> filter) {
+    // TODO also check size
+    boolean modified = false;
+    for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+      if (isSetNoCheck(i) && filter.test(i)) {
+        this.unset(i);
+        modified = true;
+      }
+    }
+    return modified;
   }
 
   @Override
