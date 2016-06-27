@@ -1,5 +1,6 @@
 package com.github.marschall.sets;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -7,11 +8,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -33,6 +36,11 @@ public class SortedSetTest {
             new Object[] {new SmallIntegerSet()});
   }
 
+//  @Before
+//  public void setUp() throws ReflectiveOperationException {
+//    this.set = this.set.getClass().getConstructor().newInstance();
+//  }
+
   @Test
   public void comparator() {
     assertNull(set.comparator());
@@ -49,6 +57,42 @@ public class SortedSetTest {
     subSet = set.subSet(1, 2);
     assertEquals(1, subSet.size());
     assertTrue(subSet.contains(1));
+  }
+
+  @Test
+  public void headSet() {
+    set.add(1);
+    set.add(3);
+    set.add(5);
+    SortedSet<Integer> headSet = set.headSet(6);
+
+    assertArrayEquals(new Integer[] {1, 3, 5}, headSet.toArray());
+
+    headSet = set.headSet(5);
+
+    assertArrayEquals(new Integer[] {1, 3}, headSet.toArray());
+
+    headSet = set.headSet(2);
+
+    assertArrayEquals(new Integer[] {1}, headSet.toArray());
+  }
+
+  @Test
+  public void tailSet() {
+    set.add(1);
+    set.add(3);
+    set.add(5);
+    SortedSet<Integer> headSet = set.tailSet(1);
+
+    assertArrayEquals(new Integer[] {1, 3, 5}, headSet.toArray());
+
+    headSet = set.tailSet(2);
+
+    assertArrayEquals(new Integer[] {3, 5}, headSet.toArray());
+
+    headSet = set.tailSet(5);
+
+    assertArrayEquals(new Integer[] {5}, headSet.toArray());
   }
 
   @Test

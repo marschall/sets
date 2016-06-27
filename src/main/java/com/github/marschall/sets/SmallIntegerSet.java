@@ -248,12 +248,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
   }
 
-  static void checkSupported(long mask, int i) {
-    if (!isSupported(mask, i)) {
-      throw new IllegalArgumentException();
-    }
-  }
-
   @Override
   public int size() {
     return size(this.values);
@@ -362,9 +356,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       return Collections.emptyNavigableSet();
     }
 
-    long headMask = (1 << endInclusive) - 1;
+    long headMask = (1 << (endInclusive + 1)) - 1;
     long tailMask = ~((1 << fromElement) - 1);
-    long mask = headMask & tailMask;
+    long mask = ~(headMask | tailMask);
     return new SmallIntegerSubSet(mask);
   }
 
@@ -378,7 +372,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (endInclusive == MIN_VALUE) {
       return Collections.emptyNavigableSet();
     }
-    long mask = (1 << endInclusive) - 1;
+    long mask = (1 << (endInclusive + 1)) - 1;
     return new SmallIntegerHeadSet(mask);
   }
 
@@ -734,7 +728,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
 
     private boolean isSupported(int i) {
-      return SmallIntegerSet.isSupported(i) && (((1L << i) & this.mask) != 0);
+      return SmallIntegerSet.isSupported(this.mask, i);
     }
 
     @Override
