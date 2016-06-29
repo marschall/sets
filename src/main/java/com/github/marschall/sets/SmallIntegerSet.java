@@ -876,13 +876,40 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
 
     @Override
+    public boolean containsAll(Collection<?> c) {
+      if (c instanceof SmallIntegerSet) {
+        return containsAll((SmallIntegerSet) c);
+      }
+      if (c instanceof AbstractSmallIntegerSubSet) {
+        return containsAll((AbstractSmallIntegerSubSet) c);
+      }
+      return containsAllGeneric(c);
+    }
+
+    private boolean containsAllGeneric(Collection<?> c) {
+      for (Object each : c) {
+        if (!this.contains(each)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    private boolean containsAll(SmallIntegerSet other) {
+      return SmallIntegerSet.containsAll(this.bits(), other.values);
+    }
+
+    private boolean containsAll(AbstractSmallIntegerSubSet other) {
+      return SmallIntegerSet.containsAll(this.bits(), other.bits());
+    }
+
+    @Override
     public int hashCode() {
       return SmallIntegerSet.hashCode(this.bits());
     }
 
     @Override
     public boolean equals(Object obj) {
-
       if (obj == this) {
         return true;
       }
@@ -901,15 +928,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
         return false;
       }
       return containsAllNonThrowing(this.bits(), other);
-    }
-
-    public Object clone() {
-      try {
-        return super.clone();
-      } catch (CloneNotSupportedException e) {
-        // this shouldn't happen, since we are Cloneable
-        throw new InternalError(e);
-      }
     }
 
     @Override

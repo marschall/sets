@@ -11,6 +11,8 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -143,7 +145,7 @@ public class SortedSetTest {
   }
 
   @Test
-  public void subSetEquals() {
+  public void subSetEqualsSameType() {
     this.set.addAll(Arrays.asList(10, 11, 12, 13));
 
     SortedSet<Integer> subSet = this.set.subSet(11, 13);
@@ -153,6 +155,56 @@ public class SortedSetTest {
 
     assertEquals(equalSet, subSet);
     assertEquals(subSet, equalSet);
+    assertEquals(subSet, subSet);
+  }
+
+  @Test
+  public void subSetEqualsSubset() {
+    this.set.addAll(Arrays.asList(10, 11, 12));
+
+    SortedSet<Integer> secondSet = this.setFactory.get();
+    secondSet.addAll(Arrays.asList(11, 12, 13));
+
+    assertEquals(this.set.subSet(11, 13), secondSet.subSet(11, 13));
+  }
+
+  @Test
+  public void subSetNotEqualsSubset() {
+    this.set.addAll(Arrays.asList(10, 11, 12));
+
+    SortedSet<Integer> secondSet = this.setFactory.get();
+    secondSet.addAll(Arrays.asList(11, 12, 13, 14));
+
+    assertNotEquals(this.set.subSet(11, 13), secondSet.subSet(11, 14));
+  }
+
+  @Test
+  public void subSetEqualsOtherSet() {
+    this.set.addAll(Arrays.asList(10, 11, 12));
+
+    Set<Integer> other = new HashSet<>();
+    other.addAll(Arrays.asList(11, 12));
+
+    assertEquals(this.set.subSet(11, 13), other);
+  }
+
+  @Test
+  public void subSetNotEqualsOtherSet() {
+    this.set.addAll(Arrays.asList(10, 11, 12));
+
+    Set<Integer> other = new HashSet<>();
+    other.addAll(Arrays.asList(10, 11, 12));
+
+    assertNotEquals(this.set.subSet(11, 13), other);
+  }
+
+  @Test
+  public void subSetNotEqualsDifferentType() {
+    this.set.addAll(Arrays.asList(10, 11, 12, 13));
+
+    SortedSet<Integer> subSet = this.set.subSet(11, 13);
+    assertNotEquals(subSet, null);
+    assertNotEquals(subSet, "aString");
   }
 
   @Test
