@@ -425,6 +425,16 @@ public class SmallIntegerSetTest {
 
     assertNotEquals(this.set, notEqualSet4);
     assertNotEquals(notEqualSet4, this.set);
+
+    Set<Integer> notEqualSet5 = new SmallIntegerSet();
+    notEqualSet5.add(9);
+    notEqualSet5.add(12);
+    notEqualSet5.add(13);
+
+    assertNotEquals(this.set, notEqualSet5);
+
+    assertNotEquals(this.set, null);
+    assertNotEquals(this.set, "aString");
   }
 
   @Test

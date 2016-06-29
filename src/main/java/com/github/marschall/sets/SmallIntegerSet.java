@@ -490,6 +490,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (c instanceof SmallIntegerSet) {
       return addAll((SmallIntegerSet) c);
     }
+    // TODO subset
     return addAllGeneric(c);
   }
 
@@ -537,6 +538,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (c instanceof SmallIntegerSet) {
       return removeAll((SmallIntegerSet) c);
     }
+    // TODO subset
     return removeAllGeneric(c);
   }
 

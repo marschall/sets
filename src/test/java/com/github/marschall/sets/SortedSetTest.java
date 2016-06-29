@@ -3,6 +3,7 @@ package com.github.marschall.sets;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -130,8 +131,6 @@ public class SortedSetTest {
     assertEquals(64, tailSet.size());
   }
 
-
-
   @Test
   public void clearSubSet() {
     this.set.addAll(Arrays.asList(10, 11, 12, 13));
@@ -141,6 +140,32 @@ public class SortedSetTest {
 
 
     assertArrayEquals(new Integer[] {10, 13}, this.set.toArray());
+  }
+
+  @Test
+  public void subSetEquals() {
+    this.set.addAll(Arrays.asList(10, 11, 12, 13));
+
+    SortedSet<Integer> subSet = this.set.subSet(11, 13);
+
+    SortedSet<Integer> equalSet = this.setFactory.get();
+    equalSet.addAll(Arrays.asList(11, 12));
+
+    assertEquals(equalSet, subSet);
+    assertEquals(subSet, equalSet);
+  }
+
+  @Test
+  public void subSetNotEquals() {
+    this.set.addAll(Arrays.asList(10, 11, 12, 13));
+
+    SortedSet<Integer> subSet = this.set.subSet(11, 14);
+
+    SortedSet<Integer> notEqualSet = this.setFactory.get();
+    notEqualSet.addAll(Arrays.asList(11, 12));
+
+    assertNotEquals(notEqualSet, subSet);
+    assertNotEquals(subSet, notEqualSet);
   }
 
   @Test
