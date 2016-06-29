@@ -147,4 +147,16 @@ public class SortedSetTest {
     }
   }
 
+
+
+  @Test
+  public void subSetEdgeCases() {
+    set.addAll(IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
+            .boxed()
+            .collect(Collectors.toList()));
+    SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
+
+    assertEquals(62, subSet.size());
+  }
+
 }

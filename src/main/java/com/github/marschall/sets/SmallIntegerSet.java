@@ -374,6 +374,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     long headMask = (1L << (endInclusive + 1L)) - 1L;
     // 0b0111
     long tailMask = ~((1L << fromElement) - 1L);
+    // 0b0110
     long mask = headMask & tailMask;
     return new SmallIntegerSubSet(mask);
   }
