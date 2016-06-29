@@ -195,6 +195,9 @@ public class SortedSetTest {
             .collect(Collectors.toList()));
     SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
 
+    assertEquals(Integer.valueOf(1), subSet.first());
+    assertEquals(Integer.valueOf(SmallIntegerSet.MAX_VALUE - 1), subSet.last());
+
     assertEquals(62, subSet.size());
   }
 
