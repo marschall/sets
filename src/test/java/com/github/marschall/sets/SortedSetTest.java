@@ -12,7 +12,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,22 +28,23 @@ public class SortedSetTest {
   // TODO modifications reflected
 
   private SortedSet<Integer> set;
+  private Supplier<SortedSet<Integer>> setFactory;
 
-  public SortedSetTest(SortedSet<Integer> set) {
-    this.set = set;
+  public SortedSetTest(Supplier<SortedSet<Integer>> setFactory) {
+    this.setFactory = setFactory;
   }
 
   @Parameters
   public static Collection<Object[]> sets() {
     return Arrays.asList(
-            new Object[] {new TreeSet<Integer>()},
-            new Object[] {new SmallIntegerSet()});
+            new Supplier[] {TreeSet::new},
+            new Supplier[] {SmallIntegerSet::new});
   }
 
-//  @Before
-//  public void setUp() throws ReflectiveOperationException {
-//    this.set = this.set.getClass().getConstructor().newInstance();
-//  }
+  @Before
+  public void setUp() throws ReflectiveOperationException {
+    this.set = this.setFactory.get();
+  }
 
   @Test
   public void comparator() {
@@ -82,17 +87,31 @@ public class SortedSetTest {
     set.add(1);
     set.add(3);
     set.add(5);
-    SortedSet<Integer> headSet = set.tailSet(1);
+    SortedSet<Integer> tailSet = set.tailSet(1);
 
-    assertArrayEquals(new Integer[] {1, 3, 5}, headSet.toArray());
+    assertArrayEquals(new Integer[] {1, 3, 5}, tailSet.toArray());
 
-    headSet = set.tailSet(2);
+    tailSet = set.tailSet(2);
 
-    assertArrayEquals(new Integer[] {3, 5}, headSet.toArray());
+    assertArrayEquals(new Integer[] {3, 5}, tailSet.toArray());
 
-    headSet = set.tailSet(5);
+    tailSet = set.tailSet(5);
 
-    assertArrayEquals(new Integer[] {5}, headSet.toArray());
+    assertArrayEquals(new Integer[] {5}, tailSet.toArray());
+  }
+
+  @Test
+  public void tailSetEdgeCase() {
+    set.addAll(IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
+            .boxed()
+            .collect(Collectors.toList()));
+    SortedSet<Integer> tailSet = set.tailSet(1);
+
+    assertEquals(63, tailSet.size());
+
+    tailSet = set.tailSet(SmallIntegerSet.MAX_VALUE);
+
+    assertEquals(1, tailSet.size());
   }
 
   @Test

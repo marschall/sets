@@ -366,12 +366,12 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (endInclusive == MAX_VALUE) {
       return tailSet(fromElement);
     }
-    if (endInclusive == startInclusive) {
+    if (startInclusive == endInclusive + 1) {
       return Collections.emptyNavigableSet();
     }
 
-    long headMask = (1 << (endInclusive + 1)) - 1;
-    long tailMask = ~((1 << fromElement) - 1);
+    long headMask = (1L << (endInclusive + 1L)) - 1L;
+    long tailMask = ~((1L << fromElement) - 1L);
     long mask = ~(headMask | tailMask);
     return new SmallIntegerSubSet(mask);
   }
@@ -386,7 +386,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (endInclusive == MIN_VALUE) {
       return Collections.emptyNavigableSet();
     }
-    long mask = (1 << (endInclusive + 1)) - 1;
+    long mask = (1L << (endInclusive + 1L)) - 1L;
     return new SmallIntegerHeadSet(mask);
   }
 
@@ -396,7 +396,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (fromElement == MIN_VALUE) {
       return this;
     }
-    long mask = ~((1 << fromElement) - 1);
+    long mask = ~((1L << fromElement) - 1L);
     return new SmallIntegerTailSet(mask);
   }
 
