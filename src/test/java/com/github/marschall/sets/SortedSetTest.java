@@ -200,11 +200,44 @@ public class SortedSetTest {
             .collect(Collectors.toList()));
     SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
 
-    assertTrue(this.set.contains(Integer.valueOf(SmallIntegerSet.MIN_VALUE)));
-    assertFalse(subSet.contains(Integer.valueOf(SmallIntegerSet.MIN_VALUE)));
+    assertTrue(this.set.contains(SmallIntegerSet.MIN_VALUE));
+    assertFalse(subSet.contains(SmallIntegerSet.MIN_VALUE));
 
-    assertTrue(this.set.contains(Integer.valueOf(SmallIntegerSet.MAX_VALUE)));
-    assertFalse(subSet.contains(Integer.valueOf(SmallIntegerSet.MAX_VALUE)));
+    assertTrue(this.set.contains(SmallIntegerSet.MAX_VALUE));
+    assertFalse(subSet.contains(SmallIntegerSet.MAX_VALUE));
+
+    assertFalse(subSet.contains(SmallIntegerSet.MAX_VALUE + 1));
+    assertFalse(subSet.contains(SmallIntegerSet.MIN_VALUE - 1));
+  }
+
+  @Test
+  public void subSetRemove() {
+    set.addAll(IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
+            .boxed()
+            .collect(Collectors.toList()));
+    SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
+
+    assertFalse(subSet.remove(SmallIntegerSet.MIN_VALUE));
+    assertTrue(this.set.contains(SmallIntegerSet.MIN_VALUE));
+
+    assertTrue(this.set.contains(2));
+    assertTrue(subSet.remove(2));
+    assertFalse(this.set.contains(2));
+
+    assertTrue(subSet.contains(3));
+    assertTrue(this.set.remove(3));
+    assertFalse(subSet.contains(2));
+  }
+
+  @Test
+  public void subAdd() {
+    SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
+
+    assertTrue(subSet.add(1));
+    assertTrue(this.set.contains(1));
+
+    assertTrue(this.set.add(2));
+    assertTrue(subSet.contains(2));
   }
 
   @Test

@@ -72,6 +72,16 @@ public class SmallIntegerSetTest {
     this.set.add(null);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void addTooSmall() {
+    this.set.add(SmallIntegerSet.MIN_VALUE - 1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void addTooLarge() {
+    this.set.add(SmallIntegerSet.MAX_VALUE + 1);
+  }
+
   @Test
   public void containsAll() {
     this.set.add(9);
