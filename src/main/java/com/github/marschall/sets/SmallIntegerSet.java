@@ -7,14 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import com.github.marschall.sets.SmallIntegerSet.SmallIntegerSubSet;
 
 /**
  * A set for small integers.
@@ -451,6 +448,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (c instanceof SmallIntegerSet) {
       return containsAll((SmallIntegerSet) c);
     }
+    if (c instanceof AbstractSmallIntegerSubSet) {
+      return containsAll((AbstractSmallIntegerSubSet) c);
+    }
     return containsAllGeneric(c);
   }
 
@@ -464,8 +464,15 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   private boolean containsAll(SmallIntegerSet other) {
-    long otherValues = other.values;
-    return (this.values & otherValues) == otherValues;
+    return containsAll(this.values, other.values);
+  }
+
+  private boolean containsAll(AbstractSmallIntegerSubSet other) {
+    return containsAll(this.values, other.bits());
+  }
+
+  private static boolean containsAll(long thisBits, long otherBits) {
+    return (thisBits & otherBits) == otherBits;
   }
 
   private boolean containsAllNonThrowing(Collection<?> c) {
@@ -490,7 +497,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (c instanceof SmallIntegerSet) {
       return addAll((SmallIntegerSet) c);
     }
-    // TODO subset
+    if (c instanceof AbstractSmallIntegerSubSet) {
+      return addAll((AbstractSmallIntegerSubSet) c);
+    }
     return addAllGeneric(c);
   }
 
@@ -503,8 +512,16 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   private boolean addAll(SmallIntegerSet other) {
+    return addAll(other.values);
+  }
+
+  private boolean addAll(AbstractSmallIntegerSubSet other) {
+    return addAll(other.bits());
+  }
+
+  private boolean addAll(long bits) {
     long before = this.values;
-    this.values |= other.values;
+    this.values |= bits;
     return before != this.values;
   }
 
@@ -512,6 +529,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   public boolean retainAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
       return retainAll((SmallIntegerSet) c);
+    }
+    if (c instanceof AbstractSmallIntegerSubSet) {
+      return retainAll((AbstractSmallIntegerSubSet) c);
     }
     return retainAllGeneric(c);
   }
@@ -527,9 +547,17 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return modified;
   }
 
+  private boolean retainAll(AbstractSmallIntegerSubSet other) {
+    return retainAll(other.bits());
+  }
+
   private boolean retainAll(SmallIntegerSet other) {
+    return retainAll(other.values);
+  }
+
+  private boolean retainAll(long bits) {
     long before = this.values;
-    this.values &= other.values;
+    this.values &= bits;
     return before != this.values;
   }
 
@@ -538,7 +566,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (c instanceof SmallIntegerSet) {
       return removeAll((SmallIntegerSet) c);
     }
-    // TODO subset
+    if (c instanceof AbstractSmallIntegerSubSet) {
+      return removeAll((AbstractSmallIntegerSubSet) c);
+    }
     return removeAllGeneric(c);
   }
 
@@ -551,8 +581,16 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   private boolean removeAll(SmallIntegerSet other) {
+    return removeAll(other.values);
+  }
+
+  private boolean removeAll(AbstractSmallIntegerSubSet other) {
+    return removeAll(other.bits());
+  }
+
+  private boolean removeAll(long bits) {
     long before = this.values;
-    this.values &= ~other.values;
+    this.values &= ~bits;
     return before != this.values;
   }
 

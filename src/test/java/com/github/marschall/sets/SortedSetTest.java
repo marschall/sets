@@ -230,7 +230,7 @@ public class SortedSetTest {
   }
 
   @Test
-  public void subAdd() {
+  public void subSetAdd() {
     SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
 
     assertTrue(subSet.add(1));
@@ -238,6 +238,44 @@ public class SortedSetTest {
 
     assertTrue(this.set.add(2));
     assertTrue(subSet.contains(2));
+  }
+
+  @Test
+  public void outerSetContainsAll() {
+    this.set.addAll(Arrays.asList(1, 2, 3, 4));
+
+    SortedSet<Integer> subSet = this.set.subSet(2, 4);
+    assertTrue(this.set.containsAll(subSet));
+  }
+
+  @Test
+  public void outerSetRemoveAll() {
+    this.set.addAll(Arrays.asList(1, 2, 3, 4));
+
+    SortedSet<Integer> toRemoveOuter = this.setFactory.get();
+    toRemoveOuter.addAll(Arrays.asList(2, 3, 4, 5, 6));
+
+    assertTrue(this.set.removeAll(toRemoveOuter.subSet(3, 6)));
+    assertArrayEquals(new Integer[] {1, 2}, this.set.toArray());
+  }
+
+  @Test
+  public void outerSetAddAll() {
+    this.set.addAll(Arrays.asList(1, 2));
+
+    SortedSet<Integer> toAddOuter = this.setFactory.get();
+    toAddOuter.addAll(Arrays.asList(3, 4, 5, 6));
+
+    assertTrue(this.set.addAll(toAddOuter.subSet(4, 6)));
+    assertArrayEquals(new Integer[] {1, 2, 4, 5}, this.set.toArray());
+  }
+
+  @Test
+  public void outerSetRetainAll() {
+    this.set.addAll(Arrays.asList(1, 2, 3, 4));
+
+    this.set.retainAll(this.set.subSet(2, 4));
+    assertArrayEquals(new Integer[] {2, 3}, this.set.toArray());
   }
 
   @Test
