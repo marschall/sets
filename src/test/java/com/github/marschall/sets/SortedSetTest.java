@@ -184,9 +184,28 @@ public class SortedSetTest {
     } catch (IllegalArgumentException e) {
       // should reach here
     }
+
+    try {
+      subSet2.add(0);
+      fail("0 should not be allowed");
+    } catch (IllegalArgumentException e) {
+      // should reach here
+    }
   }
 
+  @Test
+  public void subSetContains() {
+    set.addAll(IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
+            .boxed()
+            .collect(Collectors.toList()));
+    SortedSet<Integer> subSet = set.subSet(1, SmallIntegerSet.MAX_VALUE);
 
+    assertTrue(this.set.contains(Integer.valueOf(SmallIntegerSet.MIN_VALUE)));
+    assertFalse(subSet.contains(Integer.valueOf(SmallIntegerSet.MIN_VALUE)));
+
+    assertTrue(this.set.contains(Integer.valueOf(SmallIntegerSet.MAX_VALUE)));
+    assertFalse(subSet.contains(Integer.valueOf(SmallIntegerSet.MAX_VALUE)));
+  }
 
   @Test
   public void subSetEdgeCases() {
