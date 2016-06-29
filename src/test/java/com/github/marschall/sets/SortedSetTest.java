@@ -83,6 +83,21 @@ public class SortedSetTest {
   }
 
   @Test
+  public void headSetEdgetCases() {
+    set.addAll(IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
+            .boxed()
+            .collect(Collectors.toList()));
+
+    SortedSet<Integer> headSet = set.headSet(1);
+
+    assertEquals(1, headSet.size());
+
+    headSet = set.headSet(SmallIntegerSet.MAX_VALUE);
+
+    assertEquals(63, headSet.size());
+  }
+
+  @Test
   public void tailSet() {
     set.add(1);
     set.add(3);

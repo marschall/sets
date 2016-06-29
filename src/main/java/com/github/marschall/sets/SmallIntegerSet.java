@@ -383,9 +383,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (endInclusive == MAX_VALUE) {
       return this;
     }
-    if (endInclusive == MIN_VALUE) {
-      return Collections.emptyNavigableSet();
-    }
     long mask = (1L << (endInclusive + 1L)) - 1L;
     return new SmallIntegerHeadSet(mask);
   }
