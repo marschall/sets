@@ -130,6 +130,19 @@ public class SortedSetTest {
     assertEquals(64, tailSet.size());
   }
 
+
+
+  @Test
+  public void clearSubSet() {
+    this.set.addAll(Arrays.asList(10, 11, 12, 13));
+
+    SortedSet<Integer> subSet = this.set.subSet(11, 13);
+    subSet.clear();
+
+
+    assertArrayEquals(new Integer[] {10, 13}, this.set.toArray());
+  }
+
   @Test
   public void subSetRange() {
     set.add(1);
