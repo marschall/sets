@@ -89,12 +89,13 @@ public class SortedSetTest {
             .collect(Collectors.toList()));
 
     SortedSet<Integer> headSet = set.headSet(1);
-
     assertEquals(1, headSet.size());
 
     headSet = set.headSet(SmallIntegerSet.MAX_VALUE);
-
     assertEquals(63, headSet.size());
+
+    headSet = set.headSet(SmallIntegerSet.MAX_VALUE + 1);
+    assertEquals(64, headSet.size());
   }
 
   @Test
@@ -102,16 +103,14 @@ public class SortedSetTest {
     set.add(1);
     set.add(3);
     set.add(5);
-    SortedSet<Integer> tailSet = set.tailSet(1);
 
+    SortedSet<Integer> tailSet = set.tailSet(1);
     assertArrayEquals(new Integer[] {1, 3, 5}, tailSet.toArray());
 
     tailSet = set.tailSet(2);
-
     assertArrayEquals(new Integer[] {3, 5}, tailSet.toArray());
 
     tailSet = set.tailSet(5);
-
     assertArrayEquals(new Integer[] {5}, tailSet.toArray());
   }
 
@@ -120,13 +119,15 @@ public class SortedSetTest {
     set.addAll(IntStream.rangeClosed(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE)
             .boxed()
             .collect(Collectors.toList()));
-    SortedSet<Integer> tailSet = set.tailSet(1);
 
+    SortedSet<Integer> tailSet = set.tailSet(1);
     assertEquals(63, tailSet.size());
 
     tailSet = set.tailSet(SmallIntegerSet.MAX_VALUE);
-
     assertEquals(1, tailSet.size());
+
+    tailSet = set.tailSet(SmallIntegerSet.MIN_VALUE);
+    assertEquals(64, tailSet.size());
   }
 
   @Test
