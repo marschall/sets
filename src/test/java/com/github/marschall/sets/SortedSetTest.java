@@ -9,9 +9,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -341,6 +343,20 @@ public class SortedSetTest {
     assertEquals(Integer.valueOf(SmallIntegerSet.MAX_VALUE - 1), subSet.last());
 
     assertEquals(62, subSet.size());
+  }
+
+
+
+  @Test
+  public void subSetForEach() {
+    this.set.addAll(Arrays.asList(1, 9, 12, 25));
+
+
+    SortedSet<Integer> subSet = this.set.subSet(5, 15);
+    List<Integer> seen = new ArrayList<>(2);
+    subSet.forEach(seen::add);
+
+    assertEquals(Arrays.asList(9, 12), seen);
   }
 
 }
