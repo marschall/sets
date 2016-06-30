@@ -40,6 +40,8 @@ import java.util.function.Predicate;
  *
  * <p>This set is not fail-fast.</p>
  *
+ * <p>This set supports all optional set and iterator operations.</p>
+ *
  * <h2>Footprint</h2>
  *
  * <a href="http://openjdk.java.net/projects/code-tools/jol/">Java Object Layout</a>
@@ -710,9 +712,19 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     private static final int END = -1;
 
     /**
-     * Index of the next read, -1 means end reached.
+     * Marks the remove index as unusable.
+     */
+    private static final int NO_REMOVE = -1;
+
+    /**
+     * Index of the next read, {@value #END} means end reached.
      */
     private int nextIndex;
+
+    /**
+     * Index of the next remove, {@value #NO_REMOVE} means no remove possible.
+     */
+    private int removeIndex;
 
     SmallIntegerSetIterator() {
       this.nextIndex = findNextIndex(0);
@@ -737,6 +749,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
+      this.removeIndex = nextIndex;
       Integer next = nextIndex;
       this.nextIndex = findNextIndex(this.nextIndex + 1);
       return next;
@@ -744,8 +757,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
 
     @Override
     public void remove() {
-      // TODO Auto-generated method stub
-      Iterator.super.remove();
+      if (this.removeIndex == NO_REMOVE) {
+        throw new IllegalStateException();
+      }
+      unset(this.removeIndex);
+      this.removeIndex = NO_REMOVE;
     }
 
     @Override

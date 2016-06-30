@@ -491,6 +491,24 @@ public class SmallIntegerSetTest {
     }
   }
 
+
+  @Test
+  public void iteratorRemove() {
+    this.set.add(1);
+    Iterator<Integer> iterator = this.set.iterator();
+    assertTrue(iterator.hasNext());
+    assertEquals(Integer.valueOf(1), iterator.next());
+    iterator.remove();
+    assertFalse(iterator.hasNext());
+    try {
+      iterator.remove();
+      fail("iterator should no longer allow remove");
+    } catch (IllegalStateException e) {
+      // should reach here
+    }
+    assertTrue(this.set.isEmpty());
+  }
+
   @Test
   public void oneElementIteratorSemantics() {
     this.set.add(1);
