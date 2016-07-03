@@ -282,8 +282,6 @@ public class SmallIntegerSetTest {
     assertEquals(Arrays.asList(9, 12), seen);
   }
 
-
-
   @Test
   public void toArrayArrayArgument() {
     this.set.add(9);
@@ -292,8 +290,10 @@ public class SmallIntegerSetTest {
     Object[] result = this.set.toArray(new Integer[0]);
     assertArrayEquals(new Object[] {9, 12}, result);
 
-    result = this.set.toArray(new Integer[2]);
+    Integer[] array = new Integer[2];
+    result = this.set.toArray(array);
     assertArrayEquals(new Object[] {9, 12}, result);
+    assertSame(array, result);
   }
 
   @Test

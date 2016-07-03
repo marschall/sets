@@ -6,12 +6,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -435,8 +437,6 @@ public class SortedSetTest {
     assertEquals(62, subSet.size());
   }
 
-
-
   @Test
   public void subSetForEach() {
     this.set.addAll(Arrays.asList(1, 9, 12, 25));
@@ -447,6 +447,66 @@ public class SortedSetTest {
     subSet.forEach(seen::add);
 
     assertEquals(Arrays.asList(9, 12), seen);
+  }
+
+  @Test
+  public void subSetToArrayArrayArgument() {
+    this.set.addAll(Arrays.asList(3, 9, 12, 15));
+
+    SortedSet<Integer> subSet = this.set.subSet(9, 13);
+    Object[] result = subSet.toArray(new Integer[0]);
+    assertArrayEquals(new Object[] {9, 12}, result);
+
+    Integer[] array = new Integer[2];
+    result = subSet.toArray(array);
+    assertArrayEquals(new Object[] {9, 12}, result);
+    assertSame(array, result);
+  }
+
+  @Test
+  public void subSetToArrayArrayArgumentSetNull() {
+    this.set.addAll(Arrays.asList(3, 9, 12, 15));
+
+    SortedSet<Integer> subSet = this.set.subSet(9, 13);
+
+    Object[] array = new Object[4];
+    Arrays.fill(array, 1);
+
+    Object[] result = subSet.toArray(array);
+    assertSame(array, result);
+
+    assertArrayEquals(new Object[] {9, 12, null, 1}, result);
+  }
+
+  @Test
+  public void subSetToString() {
+    SortedSet<Integer> subSet = this.set.subSet(10, 21);
+
+    assertEquals(this.set.toString(), subSet.toString());
+
+    this.set.add(11);
+    assertEquals(this.set.toString(), subSet.toString());
+
+    this.set.add(12);
+    assertEquals(this.set.toString(), subSet.toString());
+
+    this.set.add(9);
+    Set<Integer> equalSet = this.setFactory.get();
+    equalSet.addAll(Arrays.asList(11, 12));
+
+    assertEquals(equalSet.toString(), subSet.toString());
+    assertNotEquals(this.set.toString(), subSet.toString());
+  }
+
+  @Test
+  public void subSetHashCode() {
+    this.set.addAll(Arrays.asList(3, 9, 12, 15));
+
+    SortedSet<Integer> subSet = this.set.subSet(9, 13);
+
+    Set<Integer> equalSet = new HashSet<>(Arrays.asList(9, 12));
+
+    assertEquals(equalSet.hashCode(), subSet.hashCode());
   }
 
 }
