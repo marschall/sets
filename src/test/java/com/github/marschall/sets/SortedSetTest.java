@@ -373,8 +373,6 @@ public class SortedSetTest {
     assertFalse(subSet.containsAll(other));
   }
 
-
-
   @Test
   public void subSetAdd() {
     SortedSet<Integer> subSet = this.set.subSet(1, SmallIntegerSet.MAX_VALUE);
@@ -384,6 +382,72 @@ public class SortedSetTest {
 
     assertTrue(this.set.add(2));
     assertTrue(subSet.contains(2));
+  }
+
+  @Test
+  public void subSetAddAllOuterType() {
+    SortedSet<Integer> subSet = this.set.subSet(0, 11);
+
+    SortedSet<Integer> outerType = this.setFactory.get();
+    outerType.addAll(Arrays.asList(1, 2, 3));
+
+    assertTrue(subSet.addAll(outerType));
+
+    assertArrayEquals(new Integer[] {1, 2, 3}, subSet.toArray());
+    assertArrayEquals(new Integer[] {1, 2, 3}, this.set.toArray());
+  }
+
+  @Test
+  public void subSetAddSubSet() {
+    SortedSet<Integer> subSet = this.set.subSet(0, 11);
+
+    SortedSet<Integer> outerType = this.setFactory.get();
+    outerType.addAll(Arrays.asList(1, 2, 3, 11));
+
+    assertTrue(subSet.addAll(outerType.subSet(1, 5)));
+
+    assertArrayEquals(new Integer[] {1, 2, 3}, subSet.toArray());
+    assertArrayEquals(new Integer[] {1, 2, 3}, this.set.toArray());
+
+  }
+
+  @Test
+  public void subSetAddAllOutOfRange() {
+    SortedSet<Integer> subSet = this.set.subSet(0, 11);
+
+    SortedSet<Integer> toAdd = this.set.subSet(5, 16);
+    toAdd.addAll(Arrays.asList(10, 15));
+
+    try {
+      subSet.addAll(toAdd);
+      fail("should be out of range");
+    } catch (IllegalArgumentException e) {
+      // should reach here
+    }
+  }
+
+  @Test
+  public void subSetAddAllOutOfRangeOuter() {
+    SortedSet<Integer> subSet = this.set.subSet(0, 11);
+
+    SortedSet<Integer> toAdd = this.setFactory.get();
+    toAdd.addAll(Arrays.asList(10, 15));
+
+    try {
+      subSet.addAll(toAdd);
+      fail("should be out of range");
+    } catch (IllegalArgumentException e) {
+      // should reach here
+    }
+  }
+
+  @Test
+  public void subSetAddAllOtherType() {
+    SortedSet<Integer> subSet = this.set.subSet(0, 11);
+
+    assertTrue(subSet.addAll(Arrays.asList(6, 4, 2)));
+
+    assertArrayEquals(new Integer[] {2, 4, 6}, this.set.toArray());
   }
 
   @Test

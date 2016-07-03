@@ -177,7 +177,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       0b1000000000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
   };
 
-  private long values;
+  long values;
 
   /**
    * Creates a new empty {@link SmallIntegerSet}.
@@ -475,7 +475,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return containsAll(this.values, other.bits());
   }
 
-  private static boolean containsAll(long thisBits, long otherBits) {
+  static boolean containsAll(long thisBits, long otherBits) {
     return (thisBits & otherBits) == otherBits;
   }
 
@@ -523,7 +523,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return this.addAll(other.bits());
   }
 
-  private boolean addAll(long bits) {
+  boolean addAll(long bits) {
     long before = this.values;
     this.values |= bits;
     return before != this.values;
@@ -559,7 +559,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return this.retainAll(other.values);
   }
 
-  private boolean retainAll(long bits) {
+  boolean retainAll(long bits) {
     long before = this.values;
     this.values &= bits;
     return before != this.values;
@@ -593,7 +593,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return this.removeAll(other.bits());
   }
 
-  private boolean removeAll(long bits) {
+  boolean removeAll(long bits) {
     long before = this.values;
     this.values &= ~bits;
     return before != this.values;
@@ -950,6 +950,41 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
 
     private boolean removeAll(AbstractSmallIntegerSubSet other) {
       return SmallIntegerSet.this.removeAll(other.bits() & this.mask);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Integer> c) {
+      if (c instanceof SmallIntegerSet) {
+        return this.addAll((SmallIntegerSet) c);
+      }
+      if (c instanceof AbstractSmallIntegerSubSet) {
+        return this.addAll((AbstractSmallIntegerSubSet) c);
+      }
+      return this.addAllGeneric(c);
+    }
+
+    private boolean addAllGeneric(Collection<? extends Integer> c) {
+      boolean changed = false;
+      for (Integer each : c) {
+        changed |= this.add(each);
+      }
+      return changed;
+    }
+
+    private boolean addAll(SmallIntegerSet other) {
+      long bits = other.values;
+      if ((bits & this.mask) != bits) {
+        throw new IllegalArgumentException();
+      }
+      return SmallIntegerSet.this.addAll(bits);
+    }
+
+    private boolean addAll(AbstractSmallIntegerSubSet other) {
+      long bits = other.bits();
+      if ((bits & this.mask) != bits) {
+        throw new IllegalArgumentException();
+      }
+      return SmallIntegerSet.this.addAll(bits);
     }
 
     @Override
