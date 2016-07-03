@@ -457,6 +457,8 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   private boolean containsAllGeneric(Collection<?> c) {
+    // can't check for size because Collection could be a List
+    // would have to check for Set and size
     for (Object each : c) {
       if (!this.contains(each)) {
         return false;
@@ -905,6 +907,8 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
 
     private boolean containsAllGeneric(Collection<?> c) {
+      // can't check for size because Collection could be a List
+      // would have to check for Set and size
       for (Object each : c) {
         if (!this.contains(each)) {
           return false;

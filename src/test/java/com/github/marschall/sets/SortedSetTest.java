@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -312,8 +311,6 @@ public class SortedSetTest {
     assertTrue(subSet.isEmpty());
   }
 
-
-
   @Test
   public void subSetRemoveAllOtherType() {
     this.set.addAll(Arrays.asList(10, 30, 50));
@@ -325,8 +322,56 @@ public class SortedSetTest {
     assertTrue(subSet.removeAll(toRemove));
 
     assertTrue(subSet.isEmpty());
-    assertArrayEquals(new Integer[] {10, 50}, subSet.toArray());
+    assertArrayEquals(new Integer[] {10, 50}, this.set.toArray());
   }
+
+  @Test
+  public void subSetContainsAllOuterSet() {
+    this.set.addAll(Arrays.asList(10, 20, 30, 40));
+
+    SortedSet<Integer> subSet = this.set.subSet(20, 31);
+    SortedSet<Integer> otherSet = this.setFactory.get();
+    otherSet.addAll(Arrays.asList(20, 30));
+
+    assertTrue(subSet.containsAll(otherSet));
+
+    otherSet = this.setFactory.get();
+    otherSet.addAll(Arrays.asList(10, 20, 30, 40));
+    assertTrue(this.set.containsAll(otherSet));
+    assertFalse(subSet.containsAll(otherSet));
+  }
+
+  @Test
+  public void subSetContainsAllSubSet() {
+    this.set.addAll(Arrays.asList(10, 20, 30, 40, 50, 60));
+
+    SortedSet<Integer> largerSubSet = this.set.subSet(20, 51);
+    SortedSet<Integer> smallerSubSet = largerSubSet.subSet(20, 41);
+
+    assertTrue(largerSubSet.containsAll(smallerSubSet));
+    assertFalse(smallerSubSet.containsAll(largerSubSet));
+
+    assertFalse(smallerSubSet.containsAll(this.set));
+    assertFalse(largerSubSet.containsAll(this.set));
+  }
+
+  @Test
+  public void subSetContainsAllOtherType() {
+    this.set.addAll(Arrays.asList(30, 40, 50, 60));
+
+    SortedSet<Integer> subSet = this.set.subSet(40, 51);
+
+    Set<Integer> other = new HashSet<Integer>(4);
+    other.addAll(Arrays.asList(40, 50));
+
+    assertTrue(subSet.containsAll(other));
+
+    other = new HashSet<Integer>(this.set);
+    assertTrue(this.set.containsAll(other));
+    assertFalse(subSet.containsAll(other));
+  }
+
+
 
   @Test
   public void subSetAdd() {
