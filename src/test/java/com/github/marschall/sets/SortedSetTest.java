@@ -166,6 +166,16 @@ public class SortedSetTest {
   }
 
   @Test
+  public void subSetEnd() {
+    this.set.add(this.minValue);
+    this.set.add(this.minValue + 2);
+    this.set.add(this.maxValue);
+    SortedSet<Integer> subSet = this.set.subSet(this.minValue + 1, this.maxValue + 1);
+
+    assertArrayEquals(new Integer[] {this.minValue + 2, this.maxValue}, subSet.toArray());
+  }
+
+  @Test
   public void subSetEmptyLow() {
     SortedSet<Integer> subSet = this.set.subSet(this.minValue, this.minValue);
     assertEquals(Collections.emptySortedSet(), subSet);
