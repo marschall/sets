@@ -155,6 +155,28 @@ public class SortedSetTest {
     assertArrayEquals(new Integer[] {10, 13}, this.set.toArray());
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void subSetSmallerHigh() {
+    this.set.subSet(this.minValue + 1, this.minValue);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void subSetSmallerHighLow() {
+    this.set.subSet(this.maxValue, this.maxValue - 1);
+  }
+
+  @Test
+  public void subSetEmptyLow() {
+    SortedSet<Integer> subSet = this.set.subSet(this.minValue, this.minValue);
+    assertEquals(Collections.emptySortedSet(), subSet);
+  }
+
+  @Test
+  public void subSetEmptyHigh() {
+    SortedSet<Integer> subSet = this.set.subSet(this.maxValue, this.maxValue);
+    assertEquals(Collections.emptySortedSet(), subSet);
+  }
+
   @Test
   public void subSetEqualsSameType() {
     this.set.addAll(Arrays.asList(10, 11, 12, 13));

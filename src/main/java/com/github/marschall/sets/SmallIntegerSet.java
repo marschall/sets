@@ -448,6 +448,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     int startInclusive = fromElement;
     checkSupported(startInclusive);
     int endInclusive = toElement - 1;
+    if (startInclusive == endInclusive + 1) {
+      return Collections.emptyNavigableSet();
+    }
     checkSupported(endInclusive);
     if (fromElement == MIN_VALUE && endInclusive == MAX_VALUE) {
       return this;
@@ -460,9 +463,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
     if (endInclusive == MAX_VALUE) {
       return this.tailSet(fromElement);
-    }
-    if (startInclusive == endInclusive + 1) {
-      return Collections.emptyNavigableSet();
     }
 
     // 0b1110
