@@ -14,33 +14,54 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * A set for small integers.
+ * A set for {@link Integer}s between {@value #MIN_VALUE} and
+ * {@value #MAX_VALUE}.
  *
- * <p>Only supports values from {@value #MIN_VALUE} to {@value #MAX_VALUE}.
- * Uses the same amount of memory as a single {@link Long} for the entire
- * {@link Set} even if the it contains 64 elements.</p>
+ * <p>This uses the same amount of memory as a single {@link Long} for
+ * the entire {@link Set} even if the it contains 64 elements.</p>
  *
- * <p>This set does not support {@code null} elements.</p>
+ * <p>Operations like {@link #add(Integer)} will throw an
+ * {@link IllegalArgumentException} with an argument outside the supported
+ * range. Operations like {@link #remove(Object)} or {@link #contains(Object)}
+ * will return {@code false} with an argument outside this range.  This is in
+ * accordance with the {@link Set} contract.</p>
  *
- * <p>This set keeps the elements in their natural order.</p>
+ * <p>This set does not support {@code null} elements. Operations like
+ * {@link #add(Integer)}, {@link #remove(Object)} or {@link #contains(Object)}
+ * will throw a {@link NullPointerException} if passed {@code null} as an
+ * argument. This is in accordance with the {@link Set} contract.</p>
  *
- * <p>{@link #contains(Object)}, {@link #add(Integer)}, {@link #remove(Object)}
- * and {@link #clear()} run in constant time.</p>
+ * <p>This set keeps the elements in their
+ * <a href="https://docs.oracle.com/javase/tutorial/collections/interfaces/order.html">natural order</a>.</p>
+ *
+ * <p>The operations {@link #contains(Object)}, {@link #add(Integer)},
+ * {@link #remove(Object)} and {@link #clear()} run in constant time.</p>
  *
  * <p>The operations {@link #addAll(Collection)},
  * {@link #removeAll(Collection)}, {@link #retainAll(Collection)}
  * and {@link #containsAll(Collection)} run in constant time when the argument
  * is a {@link SmallIntegerSet}.</p>
  *
- * <p>{@link #first()} and {@link #last()} run in logarithmic time.</p>
- *
- * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
+ * <p>The operations {@link #first()} and {@link #last()} run in logarithmic time.</p>
  *
  * <p>This set is not thread safe.</p>
  *
  * <p>This set is not fail-fast.</p>
  *
- * <p>This set supports all optional set and iterator operations.</p>
+ * <p>This set supports all optional {@link Set} and {@link Iterator} operations.</p>
+ *
+ * <p>This set will not preserve the object identity of the {@link Integer}s
+ * passed in but will always return the
+ * <a href="https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html">autoboxed</a>
+ * instances. The following code will pass:</p>
+ * <pre><code>
+ * Integer i = new Integer(1); // intentionally do not use instance from the Integer cache
+ * this.set.add(i);
+ * assertEquals(i, this.set.iterator().next());
+ * assertNotSame(i, this.set.iterator().next()); // will get the instance from the Integer cache
+ * </code></pre>
+ *
+ * <p>Takes inspiration from Eclipse Collections IntHashSet.</p>
  *
  * <h2>Footprint</h2>
  *
@@ -237,8 +258,51 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return (bits & (1L << i)) != 0;
   }
 
+  /**
+   * Checks if instances of this set class will support containing the given
+   * value.
+   *
+   * <p>If this set class does not support the given value operations like
+   * {@link #add(Integer)} will throw an {@link IllegalArgumentException}.</p>
+   *
+   * <p>Even instances of this set class will not support containing the given
+   * value it is still save to call operations like {@link #contains(Object)}
+   * or {@link #remove(Object)}.</p>
+   *
+   * @param i the integer to check
+   * @return {@code true} if instances of this set class will support containing
+   *  the value and it is safe to call operators like {@link #add(Integer)},
+   *  {@code false} if instances of this set class will not support containing
+   *  the value and operators like {@link #add(Integer)} will throw an
+   *  {@link IllegalArgumentException}
+   */
   public static boolean isSupported(int i) {
     return i >= MIN_VALUE && i <= MAX_VALUE;
+  }
+
+  /**
+   * Checks if instances of this set class will support containing the given
+   * value.
+   *
+   * <p>If this set class does not support the given value operations like
+   * {@link #add(Integer)} will throw an {@link IllegalArgumentException}
+   * or a {@link NullPointerException}.</p>
+   *
+   * <p>Even instances of this set class will not support containing the given
+   * value it is still save to call operations like {@link #contains(Object)}
+   * or {@link #remove(Object)} if the argument is not {@code null}.</p>
+   *
+   * <p>Like {@link #isSupported(int)} but does also a {@code} null check.</p>
+   *
+   * @param i the integer to check
+   * @return {@code true} if instances of this set class will support containing
+   *  the value and it is safe to call operators like {@link #add(Integer)},
+   *  {@code false} if instances of this set class will not support containing
+   *  the value and operators like {@link #add(Integer)} will throw an
+   *  {@link IllegalArgumentException} or a {@link NullPointerException}.
+   */
+  public static boolean isSupported(Integer i) {
+    return i != null && isSupported(i.intValue());
   }
 
   static boolean isSupported(long mask, int i) {
@@ -251,6 +315,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int size() {
     return size(this.values);
@@ -260,6 +327,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return Long.bitCount(bits);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isEmpty() {
     return isEmpty(this.values);
@@ -269,16 +339,25 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return bits == 0;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean contains(Object o) {
     return this.isSet((Integer) o);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Iterator<Integer> iterator() {
     return new SmallIntegerSetIterator();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void forEach(Consumer<? super Integer> action) {
     forEach(this.values, action);
@@ -293,6 +372,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean removeIf(Predicate<? super Integer> filter) {
     // TODO also check size
@@ -306,6 +388,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return modified;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Object[] toArray() {
     return toArray(this.values);
@@ -323,11 +408,17 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return result;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public <T> T[] toArray(T[] a) {
     return toArray(this.values, a);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   static <T> T[] toArray(long bits, T[] a) {
     int size = size(bits);
@@ -349,6 +440,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return result;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public SortedSet<Integer> subSet(Integer fromElement, Integer toElement) {
     int startInclusive = fromElement;
@@ -380,6 +474,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return new SmallIntegerSubSet(mask);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public SortedSet<Integer> headSet(Integer toElement) {
     int endInclusive = toElement - 1;
@@ -391,6 +488,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return new SmallIntegerHeadSet(mask);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public SortedSet<Integer> tailSet(Integer fromElement) {
     checkSupported(fromElement);
@@ -401,12 +501,18 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return new SmallIntegerTailSet(mask);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Comparator<? super Integer> comparator() {
     // natural order
     return null;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Integer first() {
     return first(this.values);
@@ -424,6 +530,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return Arrays.binarySearch(ONE_BIT_INDICES, lowestOneBit + Long.MIN_VALUE);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Integer last() {
     return last(this.values);
@@ -437,16 +546,25 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return log2(highestOneBit);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean add(Integer e) {
     return this.set(e);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean remove(Object o) {
     return this.unset((Integer) o);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean containsAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
@@ -498,6 +616,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean addAll(Collection<? extends Integer> c) {
     if (c instanceof SmallIntegerSet) {
@@ -531,6 +652,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean retainAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
@@ -567,6 +691,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean removeAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
@@ -601,6 +728,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void clear() {
     this.values = 0;
@@ -610,6 +740,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     this.values = this.values & ~bitsToClear;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String toString() {
     if (this.isEmpty()) {
@@ -656,6 +789,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return toStringSize;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int hashCode() {
     return hashCode(this.values);
@@ -673,6 +809,9 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return hashCode;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean equals(Object obj) {
     if (obj == this) {
@@ -696,9 +835,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   /**
-   * Returns a copy of this {@code SmallIntegerSet} instance.
+   * Returns a shallow copy of this {@code SmallIntegerSet} instance.
    *
-   * @return a clone of this {@code SmallIntegerSet} instance
+   * <p>The {@link Integer} elements themselves are not cloned.</p>
+   *
+   * @return a shallow copy of this set
    */
   @Override
   public Object clone() {
@@ -805,6 +946,8 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   abstract class AbstractSmallIntegerSubSet implements SortedSet<Integer>, Cloneable {
+
+    // TODO removeIf
 
     final long mask;
 
