@@ -452,18 +452,21 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       return Collections.emptyNavigableSet();
     }
     checkSupported(endInclusive);
-    if (fromElement == MIN_VALUE && endInclusive == MAX_VALUE) {
+    if (fromElement.intValue() == MIN_VALUE && endInclusive == MAX_VALUE) {
       return this;
     }
     if (startInclusive > endInclusive + 1) {
       throw new IllegalArgumentException();
     }
-    if (endInclusive == MAX_VALUE) {
-      return this.tailSet(fromElement);
-    }
 
     // 0b1110
-    long headMask = (1L << (endInclusive + 1L)) - 1L;
+    long headMask;
+    if (endInclusive == MAX_VALUE) {
+      // can't shift by 64
+      headMask = -1L;
+    } else {
+      headMask = (1L << (endInclusive + 1L)) - 1L;
+    }
     // 0b0111
     long tailMask = ~((1L << fromElement) - 1L);
     // 0b0110
@@ -491,7 +494,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   @Override
   public SortedSet<Integer> tailSet(Integer fromElement) {
     checkSupported(fromElement);
-    if (fromElement == MIN_VALUE) {
+    if (fromElement.intValue() == MIN_VALUE) {
       return this;
     }
     long mask = ~((1L << fromElement) - 1L);
