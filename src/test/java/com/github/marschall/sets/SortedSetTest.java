@@ -38,9 +38,13 @@ public class SortedSetTest {
 
   private SortedSet<Integer> set;
   private final Supplier<SortedSet<Integer>> setFactory;
+  private int minValue;
+  private int maxValue;
 
   public SortedSetTest(Supplier<SortedSet<Integer>> setFactory) {
     this.setFactory = setFactory;
+    this.minValue = SmallIntegerSet.MIN_VALUE;
+    this.maxValue = SmallIntegerSet.MAX_VALUE;
   }
 
   @Parameters
@@ -631,6 +635,44 @@ public class SortedSetTest {
     Set<Integer> equalSet = new HashSet<>(Arrays.asList(9, 12));
 
     assertEquals(equalSet.hashCode(), subSet.hashCode());
+  }
+
+  @Test
+  public void headSetHeadSet() {
+    this.set.addAll(Arrays.asList(0, 1, 2, 3, 4));
+    SortedSet<Integer> headSet = this.set.headSet(4).headSet(3);
+
+    assertArrayEquals(new Object[] {0, 1, 2}, headSet.toArray());
+  }
+
+  @Test
+  public void headSetTailSet() {
+    this.set.addAll(Arrays.asList(0, 1, 2, 3, 4));
+    SortedSet<Integer> headSet = this.set.headSet(4).tailSet(1);
+
+    assertArrayEquals(new Object[] {1, 2, 3}, headSet.toArray());
+  }
+
+  @Test
+  public void tailSetHeadSet() {
+    this.set.addAll(IntStream.rangeClosed(this.maxValue - 4, this.maxValue)
+            .boxed()
+            .collect(Collectors.toList()));
+
+    SortedSet<Integer> headSet = this.set.tailSet(this.maxValue - 3).headSet(this.maxValue);
+
+    assertArrayEquals(new Object[] {this.maxValue - 3, this.maxValue - 2, this.maxValue - 1}, headSet.toArray());
+  }
+
+  @Test
+  public void tailSetTailSet() {
+    this.set.addAll(IntStream.rangeClosed(this.maxValue - 4, this.maxValue)
+            .boxed()
+            .collect(Collectors.toList()));
+
+    SortedSet<Integer> headSet = this.set.tailSet(this.maxValue - 3).tailSet(this.maxValue - 2);
+
+    assertArrayEquals(new Object[] {this.maxValue - 2, this.maxValue - 1, this.maxValue}, headSet.toArray());
   }
 
   @Test

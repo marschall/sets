@@ -40,9 +40,13 @@ public class SmallIntegerSetTest {
     assertFalse(SmallIntegerSet.isSupported(null));
     assertFalse(SmallIntegerSet.isSupported(SmallIntegerSet.MIN_VALUE - 1));
     assertFalse(SmallIntegerSet.isSupported(SmallIntegerSet.MAX_VALUE + 1));
+    assertFalse(SmallIntegerSet.isSupported((Integer) (SmallIntegerSet.MIN_VALUE - 1)));
+    assertFalse(SmallIntegerSet.isSupported((Integer) (SmallIntegerSet.MAX_VALUE + 1)));
 
     assertTrue(SmallIntegerSet.isSupported(SmallIntegerSet.MIN_VALUE));
     assertTrue(SmallIntegerSet.isSupported(SmallIntegerSet.MAX_VALUE));
+    assertTrue(SmallIntegerSet.isSupported((Integer) (SmallIntegerSet.MIN_VALUE)));
+    assertTrue(SmallIntegerSet.isSupported((Integer) (SmallIntegerSet.MAX_VALUE)));
   }
 
   @Test
