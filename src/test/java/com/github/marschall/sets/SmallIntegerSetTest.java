@@ -1,15 +1,15 @@
 package com.github.marschall.sets;
 
+import static com.github.marschall.sets.Lists.toList;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import static com.github.marschall.sets.Lists.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +33,16 @@ public class SmallIntegerSetTest {
   @Before
   public void setUp() {
     this.set = new SmallIntegerSet();
+  }
+
+  @Test
+  public void isSupported() {
+    assertFalse(SmallIntegerSet.isSupported(null));
+    assertFalse(SmallIntegerSet.isSupported(SmallIntegerSet.MIN_VALUE - 1));
+    assertFalse(SmallIntegerSet.isSupported(SmallIntegerSet.MAX_VALUE + 1));
+
+    assertTrue(SmallIntegerSet.isSupported(SmallIntegerSet.MIN_VALUE));
+    assertTrue(SmallIntegerSet.isSupported(SmallIntegerSet.MAX_VALUE));
   }
 
   @Test
@@ -242,6 +252,14 @@ public class SmallIntegerSetTest {
   @Test(expected = ClassCastException.class)
   public void removeAllString() {
     this.set.removeAll(Arrays.asList(9, "String"));
+  }
+
+  @Test
+  public void removeIf() {
+    this.set.addAll(Arrays.asList(0, 1, 2, 3, 4, 5));
+
+    this.set.removeIf(i -> i % 2 == 1);
+    assertArrayEquals(new Object[] {0, 2, 4}, this.set.toArray());
   }
 
   @Test
@@ -461,6 +479,14 @@ public class SmallIntegerSetTest {
     equalSet.add(12);
 
     assertEquals(equalSet.toString(), this.set.toString());
+  }
+
+  @Test
+  public void identity() {
+    Integer i = new Integer(1);
+    this.set.add(i);
+    assertEquals(i, this.set.iterator().next());
+    assertNotSame(i, this.set.iterator().next());
   }
 
   @Test

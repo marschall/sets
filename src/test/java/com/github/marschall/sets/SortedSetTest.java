@@ -333,6 +333,16 @@ public class SortedSetTest {
   }
 
   @Test
+  public void subSetRemoveIf() {
+    this.set.addAll(Arrays.asList(0, 1, 2, 3, 4, 5));
+
+    SortedSet<Integer> subSet = this.set.subSet(1, 5);
+
+    subSet.removeIf(i -> i % 2 == 0);
+    assertArrayEquals(new Object[] {1, 3}, subSet.toArray());
+  }
+
+  @Test
   public void subSetContainsAllOuterSet() {
     this.set.addAll(Arrays.asList(10, 20, 30, 40));
 
