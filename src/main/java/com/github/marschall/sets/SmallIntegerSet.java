@@ -458,9 +458,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     if (startInclusive > endInclusive + 1) {
       throw new IllegalArgumentException();
     }
-    if (startInclusive == MIN_VALUE) {
-      return this.headSet(toElement);
-    }
     if (endInclusive == MAX_VALUE) {
       return this.tailSet(fromElement);
     }
