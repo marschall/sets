@@ -13,7 +13,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +54,7 @@ public class SortedSetTest {
   public void comparator() {
     assertNull(set.comparator());
 //    assertSame(Collections.reverseOrder(), set.descendingSet().comparator());
+    assertNull(set.subSet(0, 11).comparator());
   }
 
   @Test
@@ -448,6 +448,51 @@ public class SortedSetTest {
     assertTrue(subSet.addAll(Arrays.asList(6, 4, 2)));
 
     assertArrayEquals(new Integer[] {2, 4, 6}, this.set.toArray());
+  }
+
+  @Test
+  public void subSetRetainAllOuterType() {
+    this.set.addAll(Arrays.asList(1, 10, 15, 20, 30));
+
+    SortedSet<Integer> subSet = this.set.subSet(10, 21);
+
+    SortedSet<Integer> toRetain = this.setFactory.get();
+    toRetain.addAll(Arrays.asList(10, 20));
+
+    assertTrue(subSet.retainAll(toRetain));
+
+    assertArrayEquals(new Integer[] {1, 10, 20, 30}, this.set.toArray());
+    assertArrayEquals(new Integer[] {10, 20}, subSet.toArray());
+  }
+
+  @Test
+  public void subSetRetainAllOtherType() {
+    this.set.addAll(Arrays.asList(1, 10, 15, 20, 30));
+
+    SortedSet<Integer> subSet = this.set.subSet(10, 21);
+
+    Set<Integer> toRetain = new HashSet<>(4);
+    toRetain.addAll(Arrays.asList(10, 20));
+
+    assertTrue(subSet.retainAll(toRetain));
+
+    assertArrayEquals(new Integer[] {1, 10, 20, 30}, this.set.toArray());
+    assertArrayEquals(new Integer[] {10, 20}, subSet.toArray());
+  }
+
+  @Test
+  public void subSetRetainAllSubSetType() {
+    this.set.addAll(Arrays.asList(1, 10, 15, 20, 30));
+
+    SortedSet<Integer> subSet = this.set.subSet(10, 21);
+
+    SortedSet<Integer> toRetain = this.setFactory.get();
+    toRetain.addAll(Arrays.asList(10, 15, 20));
+
+    assertTrue(subSet.retainAll(toRetain.subSet(10, 16)));
+
+    assertArrayEquals(new Integer[] {1, 10, 15, 30}, this.set.toArray());
+    assertArrayEquals(new Integer[] {10, 15}, subSet.toArray());
   }
 
   @Test

@@ -193,7 +193,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
-  private boolean unset(int i) {
+  boolean unset(int i) {
     if (i < MIN_VALUE) {
       return false;
     }
@@ -201,9 +201,12 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       return false;
     }
     long before = this.values;
-    long after = this.values & ~(1L << i);
-    this.values = after;
-    return before != after;
+    unsetNoCheck(i);
+    return this.values != before;
+  }
+
+  void unsetNoCheck(int i) {
+    this.values = this.values & ~(1L << i);
   }
 
   private boolean isSet(int i) {
@@ -296,7 +299,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     boolean modified = false;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
       if (this.isSetNoCheck(i) && filter.test(i)) {
-        this.unset(i);
+        this.unsetNoCheck(i);
         modified = true;
       }
     }
@@ -321,7 +324,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <T> T[] toArray(T[] a) {
     return toArray(this.values, a);
   }
@@ -544,7 +546,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     boolean modified = false;
     for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
       if (this.isSetNoCheck(i) && !c.contains(i)) {
-        this.unset(i);
+        this.unsetNoCheck(i);
         modified = true;
       }
     }
@@ -708,7 +710,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
   }
 
-  final class SmallIntegerSetIterator implements Iterator<Integer> {
+  abstract static class AbstractIntegerSetIterator implements Iterator<Integer> {
 
     /**
      * Marks the end of the iteration has been reached.
@@ -730,13 +732,17 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
      */
     private int removeIndex;
 
-    SmallIntegerSetIterator() {
+    AbstractIntegerSetIterator() {
       this.nextIndex = this.findNextIndex(0);
     }
 
+    abstract boolean isSetNoCheck(int i);
+
+    abstract void unsetNoCheck(int i);
+
     private int findNextIndex(int initial) {
       for (int i = initial; i <= MAX_VALUE; ++i) {
-        if (SmallIntegerSet.this.isSetNoCheck(i)) {
+        if (this.isSetNoCheck(i)) {
           return i;
         }
       }
@@ -764,7 +770,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       if (this.removeIndex == NO_REMOVE) {
         throw new IllegalStateException();
       }
-      SmallIntegerSet.this.unset(this.removeIndex);
+      this.unsetNoCheck(this.removeIndex);
       this.removeIndex = NO_REMOVE;
     }
 
@@ -774,12 +780,26 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
         return;
       }
       for (int i = this.nextIndex; i <= MAX_VALUE; ++i) {
-        if (SmallIntegerSet.this.isSetNoCheck(i)) {
+        if (this.isSetNoCheck(i)) {
           // an exception will prevent nextIndex from being updated
           action.accept(i);
         }
       }
       this.nextIndex = END;
+    }
+
+  }
+
+  final class SmallIntegerSetIterator extends AbstractIntegerSetIterator {
+
+    @Override
+    boolean isSetNoCheck(int i) {
+      return SmallIntegerSet.this.isSetNoCheck(i);
+    }
+
+    @Override
+    void unsetNoCheck(int i) {
+      SmallIntegerSet.this.unsetNoCheck(i);
     }
 
   }
@@ -896,6 +916,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
 
     @Override
+    public Iterator<Integer> iterator() {
+      return new SmallIntegerSubSetIterator();
+    }
+
+    @Override
     public boolean containsAll(Collection<?> c) {
       if (c instanceof SmallIntegerSet) {
         return this.containsAll((SmallIntegerSet) c);
@@ -937,6 +962,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
 
     private boolean removeAllGeneric(Collection<?> c) {
+      // TODO check size, iterate over other
       boolean changed = false;
       for (Object each : c) {
         changed |= this.remove(each);
@@ -988,6 +1014,37 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
 
     @Override
+    public boolean retainAll(Collection<?> c) {
+      if (c instanceof SmallIntegerSet) {
+        return this.retainAll((SmallIntegerSet) c);
+      }
+      if (c instanceof AbstractSmallIntegerSubSet) {
+        return this.retainAll((AbstractSmallIntegerSubSet) c);
+      }
+      return this.retainAllGeneric(c);
+    }
+
+    private boolean retainAllGeneric(Collection<?> c) {
+      boolean modified = false;
+      long bits = this.bits();
+      for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
+        if (SmallIntegerSet.isSetNoCheck(bits, i) && !c.contains(i)) {
+          SmallIntegerSet.this.unsetNoCheck(i);
+          modified = true;
+        }
+      }
+      return modified;
+    }
+
+    private boolean retainAll(AbstractSmallIntegerSubSet other) {
+      return SmallIntegerSet.this.retainAll(other.bits() | ~this.mask);
+    }
+
+    private boolean retainAll(SmallIntegerSet other) {
+      return SmallIntegerSet.this.retainAll(other.values | ~this.mask);
+    }
+
+    @Override
     public int hashCode() {
       return SmallIntegerSet.hashCode(this.bits());
     }
@@ -1017,6 +1074,20 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     @Override
     public void forEach(Consumer<? super Integer> action) {
       SmallIntegerSet.forEach(this.bits(), action);
+    }
+
+    final class SmallIntegerSubSetIterator extends AbstractIntegerSetIterator {
+
+      @Override
+      boolean isSetNoCheck(int i) {
+        return SmallIntegerSet.this.isSetNoCheck(i);
+      }
+
+      @Override
+      void unsetNoCheck(int i) {
+        SmallIntegerSet.this.unsetNoCheck(i);
+      }
+
     }
 
   }
