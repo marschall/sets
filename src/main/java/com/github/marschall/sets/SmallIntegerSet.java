@@ -1080,7 +1080,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
 
       @Override
       boolean isSetNoCheck(int i) {
-        return SmallIntegerSet.this.isSetNoCheck(i);
+        return SmallIntegerSet.isSetNoCheck(AbstractSmallIntegerSubSet.this.bits(), i);
       }
 
       @Override

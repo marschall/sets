@@ -10,11 +10,16 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static com.github.marschall.sets.Lists.toList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -616,6 +621,107 @@ public class SortedSetTest {
     Set<Integer> equalSet = new HashSet<>(Arrays.asList(9, 12));
 
     assertEquals(equalSet.hashCode(), subSet.hashCode());
+  }
+
+  @Test
+  public void iteratorEdgeCases() {
+    this.set.add(SmallIntegerSet.MIN_VALUE);
+    this.set.add(1);
+    this.set.add(SmallIntegerSet.MAX_VALUE);
+
+    assertEquals(Collections.emptyList(),
+            toList(this.set.subSet(2, SmallIntegerSet.MAX_VALUE).iterator()));
+
+    assertEquals(Arrays.asList(SmallIntegerSet.MIN_VALUE),
+            toList(this.set.headSet(1).iterator()));
+
+    assertEquals(Arrays.asList(SmallIntegerSet.MAX_VALUE),
+            toList(this.set.tailSet(SmallIntegerSet.MAX_VALUE).iterator()));
+
+    assertEquals(Arrays.asList(SmallIntegerSet.MIN_VALUE, 1),
+            toList(this.set.headSet(SmallIntegerSet.MAX_VALUE).iterator()));
+  }
+
+
+
+  @Test
+  public void emptyIteratorSemantics() {
+    assertFalse(this.set.subSet(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE + 1).iterator().hasNext());
+
+    try {
+      this.set.subSet(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE + 1).iterator().next();
+      fail("iterator should not have next");
+    } catch (NoSuchElementException e) {
+      // should reach here
+    }
+  }
+
+
+  @Test
+  public void iteratorRemove() {
+    this.set.add(1);
+    this.set.add(SmallIntegerSet.MAX_VALUE - 1);
+    SortedSet<Integer> headSet = this.set.headSet(SmallIntegerSet.MAX_VALUE - 1);
+    Iterator<Integer> iterator = headSet.iterator();
+    assertTrue(iterator.hasNext());
+    assertEquals(Integer.valueOf(1), iterator.next());
+    iterator.remove();
+    assertFalse(iterator.hasNext());
+    try {
+      iterator.remove();
+      fail("iterator should no longer allow remove");
+    } catch (IllegalStateException e) {
+      // should reach here
+    }
+    assertTrue(headSet.isEmpty());
+  }
+
+  @Test
+  public void oneElementIteratorSemantics() {
+    this.set.add(1);
+    this.set.add(SmallIntegerSet.MAX_VALUE - 1);
+    Iterator<Integer> iterator = this.set.headSet(SmallIntegerSet.MAX_VALUE - 1).iterator();
+    assertTrue(iterator.hasNext());
+    assertEquals(Integer.valueOf(1), iterator.next());
+    assertFalse(iterator.hasNext());
+    try {
+      iterator.next();
+      fail("iterator should not have next");
+    } catch (NoSuchElementException e) {
+      // should reach here
+    }
+  }
+
+  @Test
+  public void forEachRemainingFromStart() {
+    this.set.addAll(Arrays.asList(SmallIntegerSet.MIN_VALUE, 11, 22, SmallIntegerSet.MAX_VALUE));
+    Iterator<Integer> iterator = this.set.subSet(SmallIntegerSet.MIN_VALUE + 1, SmallIntegerSet.MAX_VALUE).iterator();
+
+    List<Integer> acc = new ArrayList<>(2);
+    iterator.forEachRemaining(acc::add);
+
+    assertEquals(Arrays.asList(11, 22), acc);
+    assertFalse(iterator.hasNext());
+  }
+
+  @Test
+  public void forEachRemainingSkipOne() {
+    this.set.addAll(Arrays.asList(SmallIntegerSet.MIN_VALUE, 11, 22, SmallIntegerSet.MAX_VALUE));
+    Iterator<Integer> iterator = this.set.subSet(SmallIntegerSet.MIN_VALUE + 1, SmallIntegerSet.MAX_VALUE).iterator();
+    iterator.next();
+
+    List<Integer> acc = new ArrayList<>(1);
+    iterator.forEachRemaining(acc::add);
+
+    assertEquals(Collections.singletonList(22), acc);
+    assertFalse(iterator.hasNext());
+  }
+
+  @Test
+  public void forEachRemainingEmpty() {
+    this.set.addAll(Arrays.asList(SmallIntegerSet.MIN_VALUE, SmallIntegerSet.MAX_VALUE));
+    SortedSet<Integer> subSet = this.set.subSet(SmallIntegerSet.MIN_VALUE + 1, SmallIntegerSet.MAX_VALUE);
+    subSet.iterator().forEachRemaining(e -> fail("should not have any more elements"));
   }
 
 }

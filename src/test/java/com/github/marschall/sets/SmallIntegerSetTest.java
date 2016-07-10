@@ -9,6 +9,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import static com.github.marschall.sets.Lists.toList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -552,14 +554,6 @@ public class SmallIntegerSetTest {
   @Test
   public void forEachRemainingEmpty() {
     this.set.iterator().forEachRemaining(e -> fail("should not have any more elements"));
-  }
-
-  private static <T> List<T> toList(Iterator<T> iterator) {
-    List<T> result = new ArrayList<>();
-    while (iterator.hasNext()) {
-      result.add(iterator.next());
-    }
-    return result;
   }
 
   @Test(expected = NoSuchElementException.class)
