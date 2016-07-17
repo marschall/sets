@@ -1,4 +1,4 @@
-Sets [![Build Status](https://travis-ci.org/marschall/sets.svg?branch=master)](https://travis-ci.org/marschall/sets)
+Sets [![Build Status](https://travis-ci.org/marschall/sets.svg?branch=master)](https://travis-ci.org/marschall/sets) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.marschall/sets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.marschall/sets) [![Javadocs](http://www.javadoc.io/badge/com.github.marschall/sets.svg)](http://www.javadoc.io/doc/com.github.marschall/sets)
 ====
 
 Special purpose implementations of `java.util.Set` that in the right niche use case can be much more efficient than implementations shipped with the JDK.
