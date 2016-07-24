@@ -427,8 +427,8 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       result = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
     } else {
       result = a;
-      if (a.length > size) {
-        a[size] = null;
+      if (result.length > size) {
+        result[size] = null;
       }
     }
     int current = 0;
