@@ -67,7 +67,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <mavenExecutorId>forked-path</mavenExecutorId>
-          <arguments>-Pdeploy-to-sonatype-oss;generate-javadoc</arguments>
+          <arguments>-Pdeploy-to-sonatype-oss,generate-javadoc</arguments>
         </configuration>
       </plugin>
       <plugin>
