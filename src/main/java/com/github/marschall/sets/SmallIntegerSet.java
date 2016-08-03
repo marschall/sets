@@ -315,9 +315,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int size() {
     return size(this.values);
@@ -327,9 +324,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return Long.bitCount(bits);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean isEmpty() {
     return isEmpty(this.values);
@@ -339,25 +333,16 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return bits == 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean contains(Object o) {
     return this.isSet((Integer) o);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Iterator<Integer> iterator() {
     return new SmallIntegerSetIterator();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void forEach(Consumer<? super Integer> action) {
     forEach(this.values, action);
@@ -372,9 +357,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean removeIf(Predicate<? super Integer> filter) {
     // TODO also check size
@@ -388,9 +370,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return modified;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Object[] toArray() {
     return toArray(this.values);
@@ -408,17 +387,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return result;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public <T> T[] toArray(T[] a) {
     return toArray(this.values, a);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @SuppressWarnings("unchecked")
   static <T> T[] toArray(long bits, T[] a) {
     int size = size(bits);
@@ -440,9 +413,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return result;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public SortedSet<Integer> subSet(Integer fromElement, Integer toElement) {
     int startInclusive = fromElement;
@@ -474,9 +444,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return new SmallIntegerSubSet(mask);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public SortedSet<Integer> headSet(Integer toElement) {
     int endInclusive = toElement - 1;
@@ -488,9 +455,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return new SmallIntegerSubSet(mask);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public SortedSet<Integer> tailSet(Integer fromElement) {
     checkSupported(fromElement);
@@ -501,18 +465,12 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return new SmallIntegerSubSet(mask);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Comparator<? super Integer> comparator() {
     // natural order
     return null;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Integer first() {
     return first(this.values);
@@ -530,9 +488,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return Arrays.binarySearch(ONE_BIT_INDICES, lowestOneBit + Long.MIN_VALUE);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Integer last() {
     return last(this.values);
@@ -546,25 +501,16 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return log2(highestOneBit);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean add(Integer e) {
     return this.set(e);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean remove(Object o) {
     return this.unset((Integer) o);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean containsAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
@@ -616,9 +562,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return true;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean addAll(Collection<? extends Integer> c) {
     if (c instanceof SmallIntegerSet) {
@@ -652,9 +595,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean retainAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
@@ -691,9 +631,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean removeAll(Collection<?> c) {
     if (c instanceof SmallIntegerSet) {
@@ -728,9 +665,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return before != this.values;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void clear() {
     this.values = 0;
@@ -740,9 +674,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     this.values = this.values & ~bitsToClear;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public String toString() {
     if (this.isEmpty()) {
@@ -789,9 +720,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return toStringSize;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int hashCode() {
     return hashCode(this.values);
@@ -809,9 +737,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return hashCode;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean equals(Object obj) {
     if (obj == this) {

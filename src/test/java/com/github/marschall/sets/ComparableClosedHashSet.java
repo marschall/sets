@@ -6,9 +6,9 @@ import java.util.Set;
 
 public class ComparableClosedHashSet<E extends Comparable<E>> implements Set<E> {
 
-  private static final Object COLLISION = new Object();
+  static final class TreeCollision {
 
-  private static final Object LARGE_COLLISION = new Object();
+  }
 
   @Override
   public int size() {

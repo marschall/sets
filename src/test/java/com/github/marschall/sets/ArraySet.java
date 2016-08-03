@@ -41,25 +41,16 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     this(4);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int size() {
     return this.size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean isEmpty() {
     return this.size == 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean contains(Object o) {
     return indexOf(o) != -1;
@@ -74,18 +65,12 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return -1;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Iterator<E> iterator() {
     // TODO Auto-generated method stub
     return null;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Object[] toArray() {
     Object[] array = new Object[this.size];
@@ -93,9 +78,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return array;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public <T> T[] toArray(T[] a) {
     T[] result;
@@ -114,9 +96,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return result;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean add(E e) {
     if (this.contains(e)) {
@@ -132,9 +111,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return true;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean remove(Object o) {
     int index = this.indexOf(o);
@@ -146,9 +122,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return false;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean containsAll(Collection<?> c) {
     for (Object e : c) {
@@ -159,9 +132,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return true;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean addAll(Collection<? extends E> c) {
     boolean changed = false;
@@ -171,9 +141,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return changed;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean retainAll(Collection<?> c) {
     boolean changed = false;
@@ -188,9 +155,6 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return changed;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean removeAll(Collection<?> c) {
     // TODO could be made more efficient by coalescing removes
@@ -201,18 +165,12 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     return changed;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void clear() {
     this.size = 0;
     Arrays.fill(elements, null);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Spliterator<E> spliterator() {
     return Spliterators.spliterator(this.elements, 0, this.size,
