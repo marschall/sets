@@ -17,6 +17,10 @@ public class ClosedHashSet<E> implements Set<E> {
   private static final Object NULL = Null.INSTANCE;
 
   static final class Collision {
+    // Discussion: we could remove the compaction in #remove
+    // this would speed it up
+    // #add and #contains would have to be updated to scan until the
+    // end of the array
 
     static final int INITIAL_SIZE = 4;
 
@@ -43,7 +47,8 @@ public class ClosedHashSet<E> implements Set<E> {
 
     boolean add(Object o) {
       int length = elements.length;
-      for (int i = 0; i < length; i++) {
+      int i = 0;
+      while (i < length) {
         Object each = this.elements[i];
         if (each == null) {
           this.elements[i] = each;
@@ -52,11 +57,15 @@ public class ClosedHashSet<E> implements Set<E> {
         if (o.equals(each)) {
           return false;
         }
+        i += 1;
       }
-      Object[] newElements = new Object[length * 2];
-      System.arraycopy(this.elements, 0, newElements, 0, length);
-      this.elements = newElements;
-      this.elements[length] = o;
+      if (i == length) {
+        // we reached the end of the array
+        Object[] newElements = new Object[length * 2];
+        System.arraycopy(this.elements, 0, newElements, 0, length);
+        this.elements = newElements;
+      }
+      this.elements[i] = o;
       return true;
     }
 
@@ -116,17 +125,73 @@ public class ClosedHashSet<E> implements Set<E> {
 
   @Override
   public boolean contains(Object o) {
-    Object element = this.elements[this.index(o)];
+    Object key = toSentinelIfNull(o);
+
+    Object element = this.elements[this.index(key)];
     if (element == null) {
       return false;
     }
 
-    Object key = toSentinelIfNull(o);
     if (element instanceof Collision) {
       Collision collision = (Collision) element;
       return collision.contains(key);
     } else {
-      return o.equals(key);
+      return element.equals(key);
+    }
+  }
+
+  @Override
+  public boolean add(E e) {
+    Object key = toSentinelIfNull(e);
+
+    int index = this.index(key);
+    Object element = this.elements[index];
+    if (element == null) {
+      this.elements[index] = key;
+      this.size += 1;
+      return true;
+    }
+
+    if (element instanceof Collision) {
+      Collision collision = (Collision) element;
+      boolean changed = collision.add(key);
+      if (changed) {
+        this.size += 1;
+      }
+      return changed;
+    } else if (element.equals(key)) {
+      return false;
+    } {
+      Collision collision = new Collision(element, key);
+      this.elements[index] = collision;
+      this.size += 1;
+      return true;
+    }
+  }
+
+  @Override
+  public boolean remove(Object o) {
+    Object key = toSentinelIfNull(o);
+
+    int index = this.index(key);
+    Object element = this.elements[index];
+    if (element == null) {
+      return false;
+    }
+
+    if (element instanceof Collision) {
+      Collision collision = (Collision) element;
+      boolean changed = collision.remove(key);
+      if (changed) {
+        this.size -= 1;
+      }
+      return changed;
+    } else if (element.equals(key)) {
+      this.elements[index] = null;
+      this.size -= 1;
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -146,18 +211,6 @@ public class ClosedHashSet<E> implements Set<E> {
   public <T> T[] toArray(T[] a) {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  @Override
-  public boolean add(E e) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public boolean remove(Object o) {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   @Override
