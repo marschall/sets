@@ -3,10 +3,12 @@ package com.github.marschall.sets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
  *
+ * <p>This set supports {@code null}.</p>
  *
  * <p>This set silently corrupts if you add more than
  * {@value Integer#MAX_VALUE} elements.</p>
@@ -64,6 +66,10 @@ public class ClosedHashSet<E> implements Set<E> {
           return NULL;
       }
       return key;
+  }
+
+  static Object nonSentinel(Object key) {
+      return key == NULL ? null : key;
   }
 
   @Override
@@ -140,8 +146,45 @@ public class ClosedHashSet<E> implements Set<E> {
 
   @Override
   public Iterator<E> iterator() {
-    // TODO Auto-generated method stub
-    return null;
+    return new ClosedSetIterator();
+  }
+
+  final class ClosedSetIterator implements Iterator<E> {
+
+    private int tablePosition;
+    private int overflowPosition;
+    int visited;
+
+    @Override
+    public boolean hasNext() {
+      return this.visited < ClosedHashSet.this.size;
+    }
+
+    @Override
+    public E next() {
+      if (!this.hasNext()) {
+        throw new NoSuchElementException();
+      }
+      while (ClosedHashSet.this.elements[this.tablePosition] == null) {
+          this.tablePosition += 1;
+      }
+      Object element = ClosedHashSet.this.elements[this.tablePosition];
+      if (element instanceof Collision) {
+        Collision collision = (Collision) element;
+        // TODO
+
+      }
+      element = nonSentinel(element);
+      this.visited += 1;
+      return (E) element;
+    }
+
+    @Override
+    public void remove() {
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("remove");
+    }
+
   }
 
   @Override
@@ -189,6 +232,7 @@ public class ClosedHashSet<E> implements Set<E> {
   private static final Object NULL = Null.INSTANCE;
 
   static final class Collision {
+
     static final int INITIAL_SIZE = 4;
 
     private Object[] elements;
