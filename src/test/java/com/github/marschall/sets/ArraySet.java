@@ -85,8 +85,7 @@ public final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
 
   @Override
   public Iterator<E> iterator() {
-    // TODO Auto-generated method stub
-    return null;
+    return new ArraySetIterator();
   }
 
   final class ArraySetIterator implements Iterator<E> {
@@ -166,7 +165,7 @@ public final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
       return false;
     }
     if (this.size == this.elements.length) {
-      // TODO overflow check
+      // overflow will cause negative array size which will cause exception
       Object[] newElements = new Object[this.elements.length * 2];
       System.arraycopy(this.elements, 0, newElements, 0, this.size);
       this.elements = newElements;
