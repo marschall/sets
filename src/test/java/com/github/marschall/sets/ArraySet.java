@@ -5,10 +5,12 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Consumer;
 
 /**
  * A {@link Set} implementation based on an array implementation.
@@ -24,7 +26,9 @@ import java.util.Spliterators;
  *
  * @param <E> the type of elements maintained by this set
  */
-final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
+public final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
+
+  // TODO decide on supporting null
 
   private static final long serialVersionUID = 1L;
 
@@ -32,13 +36,27 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
 
   private int size;
 
-  ArraySet(int initialSize) {
+  /**
+   * Default constructor.
+   */
+  public ArraySet() {
+    this(4);
+  }
+
+  public ArraySet(int initialSize) {
     this.elements = new Object[initialSize];
     this.size = 0;
   }
 
-  ArraySet() {
-    this(4);
+  /**
+   * Array constructor.
+   *
+   * @param elements the initial set elements,
+   *  will not be copied, should not be modified by caller
+   */
+  public ArraySet(E... elements) {
+    this.size = elements.length;
+    this.elements = elements;
   }
 
   @Override
@@ -69,6 +87,52 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
   public Iterator<E> iterator() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  final class ArraySetIterator implements Iterator<E> {
+
+    /**
+     * Index of the next read.
+     */
+    private int next;
+
+    private boolean nextCalled;
+
+    ArraySetIterator() {
+      this.next = 0;
+      this.nextCalled = false;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return this.next < size;
+    }
+
+    @Override
+    public E next() {
+      if (!this.hasNext()) {
+        throw new NoSuchElementException();
+      }
+      this.nextCalled = true;
+      return (E) elements[next++];
+    }
+
+    @Override
+    public void remove() {
+      if (!this.nextCalled) {
+        throw new IllegalStateException();
+      }
+      ArraySet.this.remove(this.next--);
+      this.nextCalled = false;
+    }
+
+    @Override
+    public void forEachRemaining(Consumer<? super E> action) {
+      for (int i = next; i < elements.length; ++i) {
+        action.accept((E) elements[i]);
+      }
+    }
+
   }
 
   @Override
@@ -117,9 +181,13 @@ final class ArraySet<E> implements Set<E>, Serializable, Cloneable {
     if (index == -1) {
       return false;
     }
+    this.remove(index);
+    return true;
+  }
+
+  private void remove(int index) {
     System.arraycopy(this.elements, index + 1, this.elements, index, this.size - index);
     this.elements[this.size--] = null;
-    return false;
   }
 
   @Override
