@@ -1,20 +1,19 @@
 package com.github.marschall.sets;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import static com.github.marschall.sets.Lists.toList;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,34 +26,23 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@RunWith(Parameterized.class)
-public class SortedSetTest {
+public abstract class SortedSetTest {
 
   private SortedSet<Integer> set;
   private final Supplier<SortedSet<Integer>> setFactory;
   private int minValue;
   private int maxValue;
 
-  public SortedSetTest(Supplier<SortedSet<Integer>> setFactory) {
+  SortedSetTest(Supplier<SortedSet<Integer>> setFactory) {
     this.setFactory = setFactory;
     this.minValue = SmallIntegerSet.MIN_VALUE;
     this.maxValue = SmallIntegerSet.MAX_VALUE;
   }
 
-  @Parameters
-  public static Collection<Object[]> sets() {
-    return Arrays.asList(
-            new Supplier[] {TreeSet::new},
-            new Supplier[] {SmallIntegerSet::new});
-  }
-
-  @Before
+  @BeforeEach
   public void setUp() throws ReflectiveOperationException {
     this.set = this.setFactory.get();
   }
@@ -155,14 +143,14 @@ public class SortedSetTest {
     assertArrayEquals(new Integer[] {10, 13}, this.set.toArray());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void subSetSmallerHigh() {
-    this.set.subSet(this.minValue + 1, this.minValue);
+    assertThrows(IllegalArgumentException.class, () -> this.set.subSet(this.minValue + 1, this.minValue));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void subSetSmallerHighLow() {
-    this.set.subSet(this.maxValue, this.maxValue - 1);
+    assertThrows(IllegalArgumentException.class, () -> this.set.subSet(this.maxValue, this.maxValue - 1));
   }
 
   @Test

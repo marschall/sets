@@ -1,15 +1,16 @@
 package com.github.marschall.sets;
 
 import static com.github.marschall.sets.Lists.toList;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,14 +24,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SmallIntegerSetTest {
 
   private SortedSet<Integer> set;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     this.set = new SmallIntegerSet();
   }
@@ -83,19 +84,19 @@ public class SmallIntegerSetTest {
     assertEquals(0, this.set.size());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void addNull() {
-    this.set.add(null);
+    assertThrows(NullPointerException.class, () -> this.set.add(null));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void addTooSmall() {
-    this.set.add(SmallIntegerSet.MIN_VALUE - 1);
+    assertThrows(IllegalArgumentException.class, () -> this.set.add(SmallIntegerSet.MIN_VALUE - 1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void addTooLarge() {
-    this.set.add(SmallIntegerSet.MAX_VALUE + 1);
+    assertThrows(IllegalArgumentException.class, () -> this.set.add(SmallIntegerSet.MAX_VALUE + 1));
   }
 
   @Test
@@ -128,14 +129,14 @@ public class SmallIntegerSetTest {
     assertFalse(this.set.containsAll(other));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void containsNull() {
-    this.set.contains(null);
+    assertThrows(NullPointerException.class, () -> this.set.contains(null));
   }
 
-  @Test(expected = ClassCastException.class)
+  @Test
   public void containsString() {
-    this.set.contains("String");
+    assertThrows(ClassCastException.class, () -> this.set.contains("String"));
   }
 
   @Test
@@ -202,14 +203,14 @@ public class SmallIntegerSetTest {
     assertFalse(this.set.remove(SmallIntegerSet.MAX_VALUE + 1));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void removeNull() {
-    this.set.remove(null);
+    assertThrows(NullPointerException.class, () -> this.set.remove(null));
   }
 
-  @Test(expected = ClassCastException.class)
+  @Test
   public void removeString() {
-    this.set.remove("String");
+    assertThrows(ClassCastException.class, () -> this.set.remove("String"));
   }
 
   @Test
@@ -248,14 +249,14 @@ public class SmallIntegerSetTest {
     assertFalse(this.set.removeAll(toRemove));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void removeAllNull() {
-    this.set.removeAll(Arrays.asList(9, null));
+    assertThrows(NullPointerException.class, () -> this.set.removeAll(Arrays.asList(9, null)));
   }
 
-  @Test(expected = ClassCastException.class)
+  @Test
   public void removeAllString() {
-    this.set.removeAll(Arrays.asList(9, "String"));
+    assertThrows(ClassCastException.class, () -> this.set.removeAll(Arrays.asList(9, "String")));
   }
 
   @Test
@@ -586,9 +587,9 @@ public class SmallIntegerSetTest {
     this.set.iterator().forEachRemaining(e -> fail("should not have any more elements"));
   }
 
-  @Test(expected = NoSuchElementException.class)
+  @Test
   public void noFirst() {
-    this.set.first();
+    assertThrows(NoSuchElementException.class, () -> this.set.first());
   }
 
   @Test
@@ -600,9 +601,9 @@ public class SmallIntegerSetTest {
     assertEquals(Integer.valueOf(SmallIntegerSet.MIN_VALUE), this.set.first());
   }
 
-  @Test(expected = NoSuchElementException.class)
+  @Test
   public void noLast() {
-    this.set.last();
+    assertThrows(NoSuchElementException.class, () -> this.set.last());
   }
 
   @Test
