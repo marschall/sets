@@ -4,7 +4,7 @@
 
   <groupId>com.github.marschall</groupId>
   <artifactId>sets</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0</version>
   <inceptionYear>2016</inceptionYear>
   <url>https://github.com/marschall/sets</url>
   <name>Sets</name>
@@ -39,7 +39,7 @@
     <connection>scm:git:git@github.com:marschall/sets.git</connection>
     <developerConnection>scm:git:git@github.com:marschall/sets.git</developerConnection>
     <url>${project.url}</url>
-    <tag>HEAD</tag>
+    <tag>1.1.0</tag>
   </scm>
 
   <build>
