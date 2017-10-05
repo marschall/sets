@@ -2,7 +2,6 @@ package com.github.marschall.sets;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -125,78 +124,6 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
    * {@link IllegalArgumentException}.</p>
    */
   public static final int MAX_VALUE = 63;
-
-  /**
-   * Indices of the one bits. Uses the trick from
-   * {@link Long#compareUnsigned(long, long)} so that
-   * {@link Arrays#binarySearch(long[], long) can be used.
-   */
-  private static final long[] ONE_BIT_INDICES = {
-      0b1L + Long.MIN_VALUE,
-      0b10L + Long.MIN_VALUE,
-      0b100L + Long.MIN_VALUE,
-      0b1000L + Long.MIN_VALUE,
-      0b10000L + Long.MIN_VALUE,
-      0b100000L + Long.MIN_VALUE,
-      0b1000000L + Long.MIN_VALUE,
-      0b10000000L + Long.MIN_VALUE,
-      0b100000000L + Long.MIN_VALUE,
-      0b1000000000L + Long.MIN_VALUE,
-      0b10000000000L + Long.MIN_VALUE,
-      0b100000000000L + Long.MIN_VALUE,
-      0b1000000000000L + Long.MIN_VALUE,
-      0b10000000000000L + Long.MIN_VALUE,
-      0b100000000000000L + Long.MIN_VALUE,
-      0b1000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b10000000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b100000000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-      0b1000000000000000000000000000000000000000000000000000000000000000L + Long.MIN_VALUE,
-  };
 
   long values;
 
@@ -476,16 +403,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return first(this.values);
   }
 
-  static Integer first(long bits) {
+  static int first(long bits) {
     if (bits == 0) {
       throw new NoSuchElementException();
     }
-    long lowestOneBit = Long.lowestOneBit(bits);
-    return log2(lowestOneBit);
-  }
-
-  static int log2(long lowestOneBit) {
-    return Arrays.binarySearch(ONE_BIT_INDICES, lowestOneBit + Long.MIN_VALUE);
+    return Long.numberOfTrailingZeros(bits) + MIN_VALUE;
   }
 
   @Override
@@ -493,12 +415,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     return last(this.values);
   }
 
-  static Integer last(long bits) {
+  static int last(long bits) {
     if (bits == 0) {
       throw new NoSuchElementException();
     }
-    long highestOneBit = Long.highestOneBit(bits);
-    return log2(highestOneBit);
+    return MAX_VALUE - Long.numberOfLeadingZeros(bits);
   }
 
   @Override
@@ -971,8 +892,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
         return SmallIntegerSet.this.headSet(toElement);
       }
       this.checkSupported(toElement - 1);
-      long lowestOneBit = Long.lowestOneBit(this.mask);
-      return SmallIntegerSet.this.subSet(log2(lowestOneBit), toElement);
+      return SmallIntegerSet.this.subSet(SmallIntegerSet.first(this.bits()), toElement);
     }
 
     @Override
@@ -982,8 +902,7 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
         return SmallIntegerSet.this.tailSet(fromElement);
       }
       this.checkSupported(fromElement);
-      long highestOneBit = Long.highestOneBit(this.mask);
-      return this.subSet(fromElement, log2(highestOneBit) + 1);
+      return this.subSet(fromElement, SmallIntegerSet.last(this.bits()) + 1);
     }
 
     @Override
