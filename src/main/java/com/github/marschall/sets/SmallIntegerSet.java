@@ -106,6 +106,7 @@ import java.util.function.Predicate;
  */
 public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, Cloneable {
   // TODO implement NavigableSet
+  // TODO implement spliterator
 
   private static final long serialVersionUID = 1L;
 
@@ -727,14 +728,25 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
 
     abstract void unsetNoCheck(int i);
 
-    private int findNextIndex(int initial) {
-      for (int i = initial; i <= MAX_VALUE; ++i) {
-        if (this.isSetNoCheck(i)) {
-          return i;
-        }
+    private int findNextIndex(int startIndex) {
+      // 1 -> 0b1..10
+      // last(mask & bits)
+      long masked;
+      if (startIndex == 0) {
+        masked = this.bits();
+      } else if (startIndex == 64) {
+        return END;
+      } else {
+        long mask = ~((1L << startIndex) - 1L);
+        masked = mask & this.bits();
       }
-      return END;
+      if (masked == 0L) {
+        return END;
+      }
+      return Long.numberOfTrailingZeros(masked) + MIN_VALUE;
     }
+
+    abstract long bits();
 
     @Override
     public boolean hasNext() {
@@ -787,6 +799,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
     @Override
     void unsetNoCheck(int i) {
       SmallIntegerSet.this.unsetNoCheck(i);
+    }
+
+    @Override
+    long bits() {
+      return SmallIntegerSet.this.values;
     }
 
   }
@@ -1081,6 +1098,11 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       @Override
       void unsetNoCheck(int i) {
         SmallIntegerSet.this.unsetNoCheck(i);
+      }
+
+      @Override
+      long bits() {
+        return SmallIntegerSubSet.this.bits();
       }
 
     }
