@@ -41,7 +41,7 @@ import java.util.function.Predicate;
  * and {@link #containsAll(Collection)} run in constant time when the argument
  * is a {@link SmallIntegerSet}.</p>
  *
- * <p>The operations {@link #first()} and {@link #last()} run in logarithmic time.</p>
+ * <p>The operations {@link #first()} and {@link #last()} run in constant time.</p>
  *
  * <p>This set is not thread safe.</p>
  *
