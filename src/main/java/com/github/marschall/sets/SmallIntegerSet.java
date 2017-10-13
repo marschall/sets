@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -48,6 +49,9 @@ import java.util.function.Predicate;
  * <p>This set is not fail-fast.</p>
  *
  * <p>This set supports all optional {@link Set} and {@link Iterator} operations.</p>
+ *
+ * <p>The implementation benefits greatly from
+ * <a href="https://en.wikipedia.org/wiki/Bit_Manipulation_Instruction_Sets">Bit Manipulation Instruction Sets</a>.</p>
  *
  * <p>This set will not preserve the object identity of the {@link Integer}s
  * passed in but will always return the
@@ -696,6 +700,61 @@ public final class SmallIntegerSet implements SortedSet<Integer>, Serializable, 
       // this shouldn't happen, since we are Cloneable
       throw new InternalError(e);
     }
+  }
+
+  abstract static class AbstractIntegerSetSpliterator implements Spliterator<Integer> {
+
+    /**
+     * Marks the end of the iteration has been reached.
+     */
+    private static final int END = -1;
+
+    /**
+     * Index of the next read, {@value #END} means end reached.
+     */
+    private int nextIndex;
+
+    @Override
+    public int characteristics() {
+      return SIZED | SUBSIZED | DISTINCT | SORTED | ORDERED;
+    }
+
+    abstract int bits();
+
+    @Override
+    public Comparator<? super Integer> getComparator() {
+      // natural order
+      return null;
+    }
+
+    @Override
+    public long estimateSize() {
+      return SmallIntegerSet.size(this.bits());
+    }
+
+    @Override
+    public long getExactSizeIfKnown() {
+      return this.estimateSize();
+    }
+
+    @Override
+    public boolean tryAdvance(Consumer<? super Integer> action) {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public Spliterator<Integer> trySplit() {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public void forEachRemaining(Consumer<? super Integer> action) {
+      // TODO Auto-generated method stub
+      Spliterator.super.forEachRemaining(action);
+    }
+
   }
 
   abstract static class AbstractIntegerSetIterator implements Iterator<Integer> {
